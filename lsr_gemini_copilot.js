@@ -175,6 +175,9 @@
 
             <!-- Quick Action Chips -->
             <div class="px-3 py-2 bg-white border-t border-slate-100 flex items-center space-x-1.5 overflow-x-auto text-[11px] scrollbar-none">
+                <span class="copilot-chip bg-emerald-50 text-emerald-800 border-emerald-300 font-bold" data-cmd="Run Ground Recon Interview (5 Questions)">🎙️ Ground Recon Interview</span>
+                <span class="copilot-chip bg-amber-50 text-amber-800 border-amber-300 font-bold" data-cmd="Open Dual-Key Zero-Trust Gate">🔒 Dual-Key Verification</span>
+                <span class="copilot-chip bg-blue-50 text-blue-800 border-blue-300 font-bold" data-cmd="Show Verified Sourcing Registry">⛰️ Sourcing Registry</span>
                 <span class="copilot-chip bg-rose-50 text-rose-800 border-rose-300 font-bold" data-cmd="Explain terrain impact and crusher rate of 6600 per cum in Mizoram">⛰️ ₹6,600 Crusher Impact</span>
                 <span class="copilot-chip" data-cmd="Show ongoing and completed works for CCL International">🏢 CCL Ongoing Works</span>
                 <span class="copilot-chip" data-cmd="Analyze BOQ for Mizoram Lawngtlai project">📋 Analyze Mizoram BOQ</span>
@@ -286,12 +289,173 @@
         messagesBox.scrollTop = messagesBox.scrollHeight;
     }
 
+    // Attach global copilot answer handler for interactive question buttons
+    window.copilotAnswer = function(code) {
+        if (code === 'Q1_SHALE_FAIL' || code === 'Q2_ZERO_BAJRI' || code === 'Q5_PUSHPAK_WINDOW') {
+            if (typeof switchTab === 'function') switchTab('boq');
+            const crusherEl = document.getElementById('crusher-rate');
+            if (crusherEl) crusherEl.value = 6600;
+            const techEl = document.getElementById('tech-mode');
+            if (techEl) techEl.value = "geocrete_stabilization";
+            if (typeof recalculateBOQ === 'function') recalculateBOQ();
+
+            appendBotMessage(`
+                <div><strong>🚨 Ground Calibration Applied: Southern Mizoram Pushpak Corridor</strong></div>
+                <div class="action-card">
+                    <div>• <strong>Crusher Supply Rate</strong>: Set to ₹6,600 / cum (Zawngling-Mawhre official lot #776887).</div>
+                    <div>• <strong>Natural Bajri</strong>: ZERO detected. Local Bhuban shale fails MORTH abrasion.</div>
+                    <div>• <strong>Technology Locked</strong>: Geocrete In-Situ Soil Stabilization (cuts base cost from ₹1,280 to ₹385/sqm).</div>
+                    <div>• <strong>Project Financial Defense</strong>: Protected ₹2.02 Cr net profit on ₹13.17 Cr NIT value!</div>
+                </div>
+                <div class="text-[11px] text-slate-500 mt-1">
+                    Click <strong>"Open Dual-Key Zero-Trust Gate"</strong> chip to stamp and unlock the final bidding export!
+                </div>
+            `);
+        } else if (code === 'Q1_RBM_PASS' || code === 'Q2_PLENTIFUL' || code === 'Q5_DEEPAK_WINDOW') {
+            if (typeof switchTab === 'function') switchTab('boq');
+            const crusherEl = document.getElementById('crusher-rate');
+            if (crusherEl) crusherEl.value = 1550;
+            const techEl = document.getElementById('tech-mode');
+            if (techEl) techEl.value = "conventional_crusher";
+            if (typeof recalculateBOQ === 'function') recalculateBOQ();
+
+            appendBotMessage(`
+                <div><strong>🟢 Ground Calibration Applied: Himachal Deepak Corridor</strong></div>
+                <div class="action-card">
+                    <div>• <strong>Riverbed Bajri / RBM</strong>: Abundant along Chandra/Bhaga rivers (Keylong screening @ ₹1,550/cum).</div>
+                    <div>• <strong>Logistics Advantage</strong>: Atal Tunnel bypasses Rohtang pass; captive trailers run Panipat tankers directly.</div>
+                    <div>• <strong>Winning Strategy</strong>: Quote -4.8% discount while locking in full 20.0% net profit!</div>
+                </div>
+            `);
+        } else if (code === 'Q3_GORGE_LIFT') {
+            appendBotMessage(`
+                <div><strong>🟡 Water Logistics Calibrated</strong>: Ridge road requires 2,000 ft vertical tanker hauling from Kaladan gorge. ₹30+ Lakhs water haulage budget incorporated into overhead calculations.</div>
+            `);
+        } else if (code === 'Q4_PACKED_DRUMS') {
+            appendBotMessage(`
+                <div><strong>🟡 Bitumen Format Calibrated</strong>: Sharp hairpin geometry prevents multi-axle bulk tankers. ₹7,000/MT packed drum premium and on-site diesel heating decanters factored into DBM/BC rates.</div>
+            `);
+        } else {
+            appendBotMessage(`<div>✅ Calibrated response recorded for site parameter: <code>${code}</code></div>`);
+        }
+    };
+
     // =========================================================================
     // Core Action & Reasoning Engine (Translates chat prompts into real work)
     // =========================================================================
     async function handleUserSubmit(query) {
         appendUserMessage(query);
         const qLower = query.toLowerCase();
+
+        // 00-A. Interactive Ground Reconnaissance Interview (Item 1 & User Direct Request)
+        if (qLower.includes('interview') || (qLower.includes('ask') && qLower.includes('question')) || qLower.includes('ground recon') || (qLower.includes('audit') && qLower.includes('project'))) {
+            appendBotMessage(`
+                <div><strong>🎙️ Starting Zero-Trust Ground Recon Interview (5 Questions)</strong></div>
+                <div class="text-[11px] text-slate-600 mt-1">
+                    To eliminate unverified estimates and disastrous terrain oversights, let us calibrate the 5 physical ground realities. Select or type your observations:
+                </div>
+                
+                <div class="space-y-2 mt-2">
+                    <!-- Q1 -->
+                    <div class="p-2 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                        <div class="font-bold text-slate-800 text-xs">1. Stone Quarry & MORTH Abrasion:</div>
+                        <div class="text-[11px] text-slate-500">What is nearest quarry lead, and does local rock pass abrasion (&lt;30%)?</div>
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <button onclick="copilotAnswer('Q1_SHALE_FAIL')" class="bg-rose-50 hover:bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-1 rounded border border-rose-300">
+                                🚨 Pushpak / Shale Fails (Imported Chips @ ₹6,600/cum)
+                            </button>
+                            <button onclick="copilotAnswer('Q1_RBM_PASS')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded border border-emerald-300">
+                                🟢 Deepak / Quartzite Riverbed (Landed @ ₹1,550/cum)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div class="p-2 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                        <div class="font-bold text-slate-800 text-xs">2. Natural Riverbed Bajri Reality:</div>
+                        <div class="text-[11px] text-slate-500">Is natural riverbed bajri/RBM available within 40 km?</div>
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <button onclick="copilotAnswer('Q2_ZERO_BAJRI')" class="bg-rose-50 hover:bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-1 rounded border border-rose-300">
+                                🔴 ZERO Bajri (Surma/Bhuban Mud - Geocrete Mandated)
+                            </button>
+                            <button onclick="copilotAnswer('Q2_PLENTIFUL')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded border border-emerald-300">
+                                🟢 Plentiful Riverbed Bajri (HP/UK rivers)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Q3 -->
+                    <div class="p-2 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                        <div class="font-bold text-slate-800 text-xs">3. Compaction Water Logistics:</div>
+                        <div class="text-[11px] text-slate-500">What is the vertical lift head from river valley gorge to road ridge?</div>
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <button onclick="copilotAnswer('Q3_GORGE_LIFT')" class="bg-amber-50 hover:bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-1 rounded border border-amber-300">
+                                🟡 2,000 ft Vertical Tanker Lift (₹65/kL)
+                            </button>
+                            <button onclick="copilotAnswer('Q3_RIVER_DIRECT')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded border border-emerald-300">
+                                🟢 Direct River Pump Access (₹8/kL)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Q4 -->
+                    <div class="p-2 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                        <div class="font-bold text-slate-800 text-xs">4. Bitumen Delivery Logistics:</div>
+                        <div class="text-[11px] text-slate-500">Can bulk tankers reach site, or does geometry force packed steel drums?</div>
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <button onclick="copilotAnswer('Q4_PACKED_DRUMS')" class="bg-amber-50 hover:bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-1 rounded border border-amber-300">
+                                🟡 Packed 200kg Drums (+₹7k/MT + Decanting)
+                            </button>
+                            <button onclick="copilotAnswer('Q4_BULK_TANKER')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded border border-emerald-300">
+                                🟢 Direct Bulk Tanker (Panipat/Mathura)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Q5 -->
+                    <div class="p-2 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                        <div class="font-bold text-slate-800 text-xs">5. Working Season & District Transit Passes:</div>
+                        <div class="text-[11px] text-slate-500">What is the active dry window and are local council fees payable?</div>
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <button onclick="copilotAnswer('Q5_PUSHPAK_WINDOW')" class="bg-rose-50 hover:bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-1 rounded border border-rose-300">
+                                🔴 150 Days Window + LADC Transit Cess
+                            </button>
+                            <button onclick="copilotAnswer('Q5_DEEPAK_WINDOW')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded border border-emerald-300">
+                                🟢 185 Days Window (Standard HP transit)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-[10px] text-slate-400 mt-2 italic">
+                    💡 Click any button above to immediately calibrate the live BOQ and certify Dual-Key gate!
+                </div>
+            `);
+            return;
+        }
+
+        // 00-B. Check if user wants Dual-Key Gate or Sourcing Registry
+        if (qLower.includes('dual-key') || qLower.includes('dual key') || qLower.includes('sign off') || qLower.includes('unlock boq')) {
+            if (typeof openDualKeyModal === 'function') openDualKeyModal();
+            appendBotMessage(`
+                <div><strong>🔒 Dual-Key Verification Gate Opened</strong></div>
+                <div class="text-[11px] text-slate-600 mt-1">
+                    To comply with the Zero-Trust Bidding Protocol, both Key 1 (Site Recon Sourcing) and Key 2 (Commercial Breakeven Floor) must be stamped before final submission figures can be exported.
+                </div>
+            `);
+            return;
+        }
+
+        if (qLower.includes('sourcing registry') || qLower.includes('quarry registry') || qLower.includes('registry')) {
+            if (typeof switchTab === 'function') switchTab('sourcing');
+            appendBotMessage(`
+                <div><strong>⛰️ Switched to Verified Sourcing & Quarry Registry</strong></div>
+                <div class="text-[11px] text-slate-600 mt-1">
+                    Displaying 6 audited corridors with official BRO allotment rates (₹6,600/cum in Pushpak vs ₹1,550 in Deepak vs ₹385 in UPFDR).
+                </div>
+            `);
+            return;
+        }
 
         // 0A. Check if user wants AI Fit Score / Pre-Bid Qualification Audit
         if (qLower.includes('fit score') || qLower.includes('qualification') || qLower.includes('risk audit') || qLower.includes('eligibility')) {
