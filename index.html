@@ -1523,29 +1523,93 @@
             let singleReq = (valCr * 0.80).toFixed(2);
             let solvReq = (valCr * 0.40).toFixed(2);
 
-            if (locL.includes('mizoram') || locL.includes('lawngtlai')) {
+            // 5-Factor Ground Terrain & Sourcing Reality Scorecard
+            let stoneFact = "Standard local quarry within 25 km.";
+            let waterFact = "Abundant local water supply.";
+            let bituFact = "Bulk VG-30 directly decanted from refinery.";
+            let fuelFact = "Standard plains fuel economy (~3.2 km/L).";
+            let seasonFact = "8-10 Months dry working window.";
+            let terrainBadgeClass = "bg-emerald-100 text-emerald-800 border-emerald-300";
+            let terrainBadgeText = "Low Logistics Friction";
+
+            if (locL.includes('mizoram') || locL.includes('lawngtlai') || locL.includes('aizawl')) {
                 fitScore = 96;
-                riskLevel = "Prime Technical Match";
-                frostRisk = "Monsoon buffer required (June-Sept); dry winter ideal for WMM/DBM laying.";
+                riskLevel = "Geocrete Mandate (Zero Bajri)";
+                terrainBadgeClass = "bg-rose-100 text-rose-800 border-rose-300 animate-pulse";
+                terrainBadgeText = "🚨 CRITICAL ZERO-BAJRI ZONE";
+                frostRisk = "Monsoon buffer required (June-Sept); 150-day winter dry season for Geocrete stabilization.";
+                stoneFact = "🔴 <strong>Zero Natural Bajri / RBM</strong>. Soft Bhuban shale fails MORTH abrasion specs. Crushed chips cost <strong>₹6,600/cum</strong> (hauled 250+ km). Conventional WMM/DBM causes +91% cost overrun! <em>Mandatory Geocrete In-Situ Stabilization (₹385/sqm).</em>";
+                waterFact = "🔴 <strong>Severe Ridge Water Scarcity</strong>. Road runs on knife-ridge; river 2,000 ft below in gorge. Communal springs (Tuikhur) strictly barred by Village Councils. Tanker hauling costs <strong>₹55-70/kL</strong> (adds ₹30+ L).";
+                bituFact = "🔴 <strong>Packed Drums & 1,000 km Lead</strong>. Solidified transit from Guwahati/Haldia. Multi-axle tankers blocked by hairpins; ₹7,000/MT drum premium + diesel heating decanting + 0.5% Anti-Stripping Agent.";
+                fuelFact = "🟡 <strong>1st/2nd Gear Mountain Climbing</strong>. 1:10 gradients drop tipper mileage to 1.1 km/L (2.8x burn). HMP aggregate dryer burner consumes +35% LDO in cold/misty air.";
+                seasonFact = "🔴 <strong>150-Day Working Season</strong>. 5 months torrential monsoon (May-Oct) halts all paving. Entire annual plant recovery must occur in Nov-April.";
             } else if (locL.includes('chamoli') || locL.includes('uttarakhand')) {
                 fitScore = 94;
                 riskLevel = "High Altitude Mountain Execution";
+                terrainBadgeClass = "bg-amber-100 text-amber-800 border-amber-300";
+                terrainBadgeText = "NGT Restricted RBM";
                 frostRisk = "Sub-zero temperatures after Nov 15th require immediate mobilization of HMP batch plant.";
-            } else if (locL.includes('arunachal') || locL.includes('tawang')) {
+                stoneFact = "🟢 <strong>Natural Bajri Plentiful</strong> in Alaknanda riverbed, but strictly regulated under <strong>NGT Eco-Sensitive & Char Dham mining bans</strong>. Landed aggregate: ₹2,400/cum.";
+                waterFact = "🟢 <strong>Abundant River Water</strong> from Alaknanda & Dhauliganga (simple diesel pump extraction).";
+                bituFact = "🟢 <strong>Bulk Tankers Reachable</strong> via Rishikesh-Joshimath highway. Anti-stripping agent required for quartzite.";
+                fuelFact = "🟡 <strong>Altitude & Traffic Friction</strong>. Yatra season pilgrim controls slow tipper turnaround; 1.8 km/L climbing fuel burn.";
+                seasonFact = "🟡 <strong>6-7 Month Window</strong>. Winter frost heaving after Nov 15th; active season April to Oct.";
+            } else if (locL.includes('arunachal') || locL.includes('tawang') || locL.includes('subansiri')) {
                 fitScore = 91;
                 riskLevel = "Border Logistic Complexity";
-                frostRisk = "Snowbound passes mandate high fuel bowser reserves.";
-            } else if (locL.includes('himachal')) {
+                terrainBadgeClass = "bg-rose-100 text-rose-800 border-rose-300";
+                terrainBadgeText = "Extreme Altitude Deration";
+                frostRisk = "Snowbound passes mandate high fuel bowser reserves & sub-zero asphalt laying protocol.";
+                stoneFact = "🟡 <strong>Valley Bajri Available</strong> in Kameng riverbed, but steep 2,500m elevation climb to ridge roads adds heavy transport cost. Landed cost: ₹2,900/cum.";
+                waterFact = "🟢 <strong>Plentiful Glacial Streams</strong> along road alignment.";
+                bituFact = "🟡 <strong>Packed Bitumen in Winter</strong>. Winter transit delays over Sela Pass; requires PMB / CRMB-55 for sub-zero cracking.";
+                fuelFact = "🔴 <strong>40% Engine Power Deration</strong>. 12,000 ft altitude oxygen starvation chokes naturally aspirated engines; fuel economy 0.95 km/L.";
+                seasonFact = "🔴 <strong>Short 130-150 Day Window</strong>. Heavy monsoon plus winter snow; Asphalt laying banned below 10°C.";
+            } else if (locL.includes('himachal') || locL.includes('lahaul') || locL.includes('keylong')) {
                 fitScore = 97;
-                riskLevel = "Deepak Corridor Preferred";
-                frostRisk = "Favorable access via Manali-Chandigarh corridor.";
-            } else if (locL.includes('uttar pradesh')) {
-                fitScore = 89;
-                riskLevel = "FDR Pkg Qualification";
-                frostRisk = "Plain terrain; requires cement stabilization rig.";
+                riskLevel = "Prime LSR Profit Corridor";
+                terrainBadgeClass = "bg-emerald-100 text-emerald-800 border-emerald-300";
+                terrainBadgeText = "Abundant Bajri / Prime Margin";
+                frostRisk = "Favorable access via Manali-Chandigarh corridor; Atal Tunnel keeps logistics open.";
+                stoneFact = "🟢 <strong>Abundant High-CBR Bajri & RBM</strong> along Chandra/Bhaga rivers. Cheap mobile cone screening (₹1,500/cum landed).";
+                waterFact = "🟢 <strong>Abundant Cold River Water</strong> available along Manali-Leh axis.";
+                bituFact = "🟢 <strong>Direct Bulk Tankers from Panipat Refinery</strong> via Atal Tunnel. Lowest transit friction.";
+                fuelFact = "🟢 <strong>Atal Tunnel Advantage</strong> eliminates Rohtang climb; smooth transit for LSR 11 captive trailers.";
+                seasonFact = "🟡 <strong>180-Day Window</strong> (April to end-October before heavy winter frost). Highly profitable at -5% discount.";
+            } else if (locL.includes('uttar pradesh') || locL.includes('varanasi') || locL.includes('prayagraj')) {
+                fitScore = 98;
+                riskLevel = "LSR Home Turf (FDR Technology)";
+                terrainBadgeClass = "bg-blue-100 text-blue-800 border-blue-300";
+                terrainBadgeText = "FDR In-Situ Stabilization";
+                frostRisk = "Plain terrain; requires cement stabilization rig and water bowser spread.";
+                stoneFact = "💎 <strong>Full Depth Reclamation (FDR) Mandated</strong>. Eliminates conventional stone base. In-situ roadbed recycled with cement + chemical additive (Mirzapur stone ballast ₹1,650/cum only for thin seal).";
+                waterFact = "🟢 <strong>Tubewell Water Everywhere</strong> (free agricultural extraction).";
+                bituFact = "🟢 <strong>Bulk Tankers from Mathura Refinery</strong> (12-hour turnaround).";
+                fuelFact = "🟢 <strong>Flat Plains Fuel Economy</strong>: 3.4 km/L for tippers; optimal engine efficiency.";
+                seasonFact = "🟢 <strong>9-10 Months Working Window</strong> (only suspended during peak July-August rains). Protected 24% EBITDA.";
+            } else if (locL.includes('kargil') || locL.includes('ladakh')) {
+                fitScore = 88;
+                riskLevel = "High Altitude Trans-Himalayan Risk";
+                terrainBadgeClass = "bg-rose-100 text-rose-800 border-rose-300";
+                terrainBadgeText = "Ultra-Short 90-Day Season";
+                frostRisk = "Extreme sub-zero (-35°C) winter; short summer paving window.";
+                stoneFact = "🟡 <strong>Suru Valley Glacial Moraine Plentiful</strong>, but extreme diesel consumption to run crushers at 11,000 ft.";
+                waterFact = "🟢 <strong>Glacial Melt Streams Plentiful</strong>.";
+                bituFact = "🔴 <strong>Mandatory CRMB / PMB Bitumen</strong> to prevent -35°C frost heaving; high procurement premium.";
+                fuelFact = "🔴 <strong>Severe Fuel Surcharge</strong>: High altitude deration + Zojila pass transit tolls.";
+                seasonFact = "🔴 <strong>Strict 90-Day Paving Season</strong> (June 15 to Sept 20). Must quote +5% to +8% PREMIUM!";
+            } else {
+                fitScore = 92;
+                riskLevel = "Standard Civil Roadwork";
+                frostRisk = "Standard regional weather cycle.";
+                stoneFact = "🟢 Standard basalt or quartzite quarries within 35 km (₹1,200/cum).";
+                waterFact = "🟢 Municipal / tanker water available.";
+                bituFact = "🟢 Bulk VG-30 directly decanted.";
+                fuelFact = "🟢 Normal road gradient consumption (2.8 km/L).";
+                seasonFact = "🟢 8-9 Months execution window.";
             }
 
-            document.getElementById('fit-modal-title').innerText = `AI Pre-Bid Qualification Audit: ${tender.id}`;
+            document.getElementById('fit-modal-title').innerText = `AI Pre-Bid Qualification & Terrain Audit: ${tender.id}`;
             document.getElementById('fit-modal-sub').innerText = `${tender.scope} | ${tender.agency}`;
             document.getElementById('fit-score-display').innerText = `${fitScore}%`;
             document.getElementById('fit-risk-tag').innerText = riskLevel;
@@ -1554,6 +1618,57 @@
             document.getElementById('fit-single-req').innerText = `₹ ${singleReq} Cr`;
             document.getElementById('fit-solv-req').innerText = `₹ ${solvReq} Cr`;
             document.getElementById('fit-frost-note').innerText = frostRisk;
+
+            const factorsEl = document.getElementById('fit-ground-factors');
+            if (factorsEl) {
+                factorsEl.innerHTML = `
+                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                        <div class="flex justify-between font-bold text-slate-800">
+                            <span>1. Stone & "Bajri" Reality:</span>
+                            <span class="text-blue-700 font-semibold">Material Sourcing</span>
+                        </div>
+                        <div class="text-[11px] text-slate-600">${stoneFact}</div>
+                    </div>
+
+                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                        <div class="flex justify-between font-bold text-slate-800">
+                            <span>2. Water Logistics & Compaction:</span>
+                            <span class="text-blue-700 font-semibold">Moisture & Hydration</span>
+                        </div>
+                        <div class="text-[11px] text-slate-600">${waterFact}</div>
+                    </div>
+
+                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                        <div class="flex justify-between font-bold text-slate-800">
+                            <span>3. Bitumen Logistics & Chemistry:</span>
+                            <span class="text-blue-700 font-semibold">Bulk vs Packed Drums</span>
+                        </div>
+                        <div class="text-[11px] text-slate-600">${bituFact}</div>
+                    </div>
+
+                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                        <div class="flex justify-between font-bold text-slate-800">
+                            <span>4. Gradient & Altitude Fuel Multiplier:</span>
+                            <span class="text-blue-700 font-semibold">HSD & LDO Burn</span>
+                        </div>
+                        <div class="text-[11px] text-slate-600">${fuelFact}</div>
+                    </div>
+
+                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                        <div class="flex justify-between font-bold text-slate-800">
+                            <span>5. Working Season & Plant Amortization:</span>
+                            <span class="text-blue-700 font-semibold">Weather Window</span>
+                        </div>
+                        <div class="text-[11px] text-slate-600">${seasonFact}</div>
+                    </div>
+                `;
+            }
+
+            const badgeEl = document.getElementById('fit-terrain-badge');
+            if (badgeEl) {
+                badgeEl.className = "text-[10px] font-extrabold px-2 py-0.5 rounded border " + terrainBadgeClass;
+                badgeEl.innerText = terrainBadgeText;
+            }
 
             document.getElementById('fit-score-modal').classList.remove('hidden');
         }
@@ -1914,6 +2029,21 @@
                     <div>• <strong>Weather/Freeze Window</strong>: <span id="fit-frost-note" class="font-semibold">Sub-zero temperatures after Nov 15th require immediate mobilization.</span></div>
                     <div>• <strong>Clause 10CA Escalation</strong>: VG-30 Bitumen & HSD indices fully protected under BRO MoCI standard variation formula.</div>
                     <div>• <strong>Defect Liability Period (DLP)</strong>: 36 Months maintenance bond required; covered within active PNB bank guarantee portfolio.</div>
+                </div>
+            </div>
+
+            <!-- 5-Factor Ground Terrain & Sourcing Reality Scorecard -->
+            <div class="space-y-2 pt-2 border-t border-slate-200">
+                <div class="flex justify-between items-center">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center">
+                        <i class="fa-solid fa-mountain-sun text-amber-600 mr-1.5"></i>
+                        <span>5-Factor Terrain & Sourcing Reality (Ground Truth)</span>
+                    </h4>
+                    <span id="fit-terrain-badge" class="text-[10px] font-extrabold px-2 py-0.5 rounded border bg-amber-100 text-amber-800 border-amber-300">Audited</span>
+                </div>
+                
+                <div id="fit-ground-factors" class="space-y-1.5 text-xs">
+                    <!-- Injected dynamically by openFitScoreAudit -->
                 </div>
             </div>
 
