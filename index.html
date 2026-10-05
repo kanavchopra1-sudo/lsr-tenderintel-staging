@@ -320,6 +320,45 @@
                         <strong>Clause 10CA Protection:</strong> Bitumen Price Escalation is struck out for 1-year duration. A 4% safety buffer is included in DBM/BC rates.
                     </div>
 
+                    <!-- Mountain Terrain & Crusher Supply Rate Calibration (Pushpak Reality) -->
+                    <div class="pt-3 border-t border-slate-200 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-800 flex items-center">
+                                <i class="fa-solid fa-mountain text-amber-600 mr-1.5"></i>
+                                Terrain & Crusher Calibration
+                            </span>
+                            <span id="terrain-badge" class="text-[10px] bg-rose-100 text-rose-800 font-extrabold px-1.5 py-0.5 rounded border border-rose-200 animate-pulse">Pushpak Alert</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 leading-snug">
+                            Local rock in Pushpak (Lawngtlai/Kalchaw) is fragile shale. Tenders for supply of crusher materials/chips are allotted at <strong class="text-rose-600 font-bold">~₹6,600 / cum</strong>.
+                        </p>
+                        
+                        <div class="space-y-2 text-xs">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Crusher Supply Rate at Site (₹/cum):</label>
+                                <div class="relative">
+                                    <input type="number" id="crusher-rate" value="6600" step="100" oninput="recalculateBOQ()" class="w-full p-2 border border-amber-300 rounded-lg font-bold text-slate-800 bg-amber-50 focus:ring-2 focus:ring-amber-500 text-sm">
+                                    <span class="absolute right-3 top-2.5 text-xs text-amber-700 font-semibold">₹ / cum</span>
+                                </div>
+                                <span class="text-[10px] text-slate-400">Recent Allotments: ₹6,500 - ₹6,650 (BRN / Hema Pradhan)</span>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Construction Technology Mode:</label>
+                                <select id="tech-mode" onchange="recalculateBOQ()" class="w-full p-2 border border-slate-300 rounded-lg text-xs font-bold text-blue-700 focus:ring-2 focus:ring-blue-500">
+                                    <option value="conventional_crusher" selected>⚠️ Conventional WMM/DBM (Crusher @ ₹6,600/cum)</option>
+                                    <option value="geocrete_stabilization">💎 Geocrete In-Situ Soil Stabilization (Disruptive Edge)</option>
+                                    <option value="standard_ssr">Standard Mainland SSR Baseline (₹2,200/cum)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Terrain Impact Banner -->
+                        <div id="terrain-impact-banner" class="p-3 rounded-lg border text-xs space-y-1">
+                            <!-- Injected dynamically by recalculateBOQ -->
+                        </div>
+                    </div>
+
                     <!-- Mountain Quarry Lead & Haulage Fuel Calculator (HCSS HeavyBid Style) -->
                     <div class="pt-3 border-t border-slate-200 space-y-2.5">
                         <div class="flex items-center justify-between">
@@ -1099,8 +1138,81 @@
             const marginVal = document.getElementById('margin-val');
             if (marginVal) marginVal.innerText = marginPct.toFixed(1) + ' %';
 
+            const crusherEl = document.getElementById('crusher-rate');
+            const crusherRate = crusherEl ? (parseFloat(crusherEl.value) || 6600) : 6600;
+            const techModeEl = document.getElementById('tech-mode');
+            const techMode = techModeEl ? techModeEl.value : 'conventional_crusher';
+
             const pkg = boqPackages[currentBoqPkgKey] || boqPackages["787576"];
-            boqItems = pkg.items;
+            
+            // Create a deep copy of items so we can adapt rates based on tech mode and crusher price
+            boqItems = JSON.parse(JSON.stringify(pkg.items));
+
+            // Terrain & Crusher Supply Adaptation (Crucial Ground Reality in Pushpak / Lawngtlai)
+            if (currentBoqPkgKey === "787576" || pkg.id.includes("787576") || pkg.name.includes("Mizoram")) {
+                if (techMode === 'conventional_crusher') {
+                    // Conventional road construction where stone chips are procured at local allotted crusher tender rate (e.g. ₹6,600/cum)
+                    boqItems.forEach(item => {
+                        if (item.id === "1.01") {
+                            // WMM 150mm: Stone volume = 0.18 cum/sqm -> 0.18 * 6600 = Rs 1188 stone + Rs 92 laying/water/compaction
+                            item.base = Math.round(0.18 * crusherRate + 92);
+                            item.desc = "WMM 75mm (Compacted 150mm) [Crusher Chips @ ₹" + Math.round(crusherRate) + "/cum]";
+                            item.compRates = { "CCL Intl": item.base + 35, "Bhanwar Lal": item.base + 45, "BL Industries": item.base + 55, "Avg": item.base + 45, "Range": `₹${item.base+20} - ₹${item.base+60}` };
+                        } else if (item.id === "1.02") {
+                            // WMM 100mm: Stone volume = 0.12 cum/sqm -> 0.12 * 6600 = Rs 792 stone + Rs 68 laying
+                            item.base = Math.round(0.12 * crusherRate + 68);
+                            item.desc = "WMM 100mm [Crusher Chips @ ₹" + Math.round(crusherRate) + "/cum]";
+                            item.compRates = { "CCL Intl": item.base + 25, "Bhanwar Lal": item.base + 35, "BL Industries": item.base + 40, "Avg": item.base + 33, "Range": `₹${item.base+15} - ₹${item.base+45}` };
+                        } else if (item.id === "1.03") {
+                            item.base = 48; // Prime Coat Emulsion in remote mountain
+                        } else if (item.id === "1.04") {
+                            item.base = 32; // Tack Coat
+                        } else if (item.id === "1.05") {
+                            // DBM 50mm: 0.0475 cum stone chips * crusherRate + Bitumen VG-30 (5.45kg @ Rs 65) + HMP/tipper/paver
+                            item.base = Math.round(0.0475 * crusherRate + 354 + 452);
+                            item.desc = "DBM 50mm VG-30 [Aggregates @ ₹" + Math.round(crusherRate) + "/cum + Bitumen VG-30]";
+                            item.compRates = { "CCL Intl": item.base + 40, "Bhanwar Lal": item.base + 55, "BL Industries": item.base + 65, "Avg": item.base + 53, "Range": `₹${item.base+30} - ₹${item.base+75}` };
+                        } else if (item.id === "1.06") {
+                            // BC 30mm: 0.0285 cum stone chips * crusherRate + Bitumen VG-30 (3.97kg @ Rs 65) + HMP/laying
+                            item.base = Math.round(0.0285 * crusherRate + 258 + 274);
+                            item.desc = "BC 30mm VG-30 [Chips @ ₹" + Math.round(crusherRate) + "/cum + Bitumen]";
+                            item.compRates = { "CCL Intl": item.base + 30, "Bhanwar Lal": item.base + 42, "BL Industries": item.base + 48, "Avg": item.base + 40, "Range": `₹${item.base+20} - ₹${item.base+55}` };
+                        } else if (item.id === "1.07") {
+                            item.base = 750;
+                        }
+                    });
+                } else if (techMode === 'geocrete_stabilization') {
+                    // LSR In-Situ Soil / Soft Rock Stabilization using Geocrete Nano-Additive + Cement (ZERO imported stone chips needed!)
+                    boqItems.forEach(item => {
+                        if (item.id === "1.01") {
+                            item.base = 385;
+                            item.desc = "💎 Geocrete In-Situ Soil Stabilization 150mm (Replaces WMM; ZERO Stone Import)";
+                            item.compRates = { "CCL Intl": 1315, "Bhanwar Lal": 1325, "BL Industries": 1335, "Avg": 1325, "Range": "Conventional: ₹1,280 - ₹1,340" };
+                        } else if (item.id === "1.02") {
+                            item.base = 275;
+                            item.desc = "💎 Geocrete In-Situ Soil Stabilization 100mm (Replaces WMM; ZERO Stone Import)";
+                            item.compRates = { "CCL Intl": 885, "Bhanwar Lal": 895, "BL Industries": 905, "Avg": 895, "Range": "Conventional: ₹860 - ₹910" };
+                        } else if (item.id === "1.03") {
+                            item.base = 44;
+                        } else if (item.id === "1.04") {
+                            item.base = 30;
+                        } else if (item.id === "1.05") {
+                            item.base = 1020;
+                            item.desc = "DBM 50mm over Impermeable Monolithic Geocrete Base";
+                            item.compRates = { "CCL Intl": 1160, "Bhanwar Lal": 1175, "BL Industries": 1185, "Avg": 1173, "Range": "Conventional: ₹1,120 - ₹1,185" };
+                        } else if (item.id === "1.06") {
+                            item.base = 680;
+                            item.desc = "BC 30mm Wearing Course (Long Life on Geocrete Sub-base)";
+                            item.compRates = { "CCL Intl": 750, "Bhanwar Lal": 762, "BL Industries": 768, "Avg": 760, "Range": "Conventional: ₹720 - ₹770" };
+                        } else if (item.id === "1.07") {
+                            item.base = 710;
+                        }
+                    });
+                } else if (techMode === 'standard_ssr') {
+                    // Standard Mainland SSR baseline
+                    boqItems = pkg.items;
+                }
+            }
 
             const tbody = document.getElementById('boq-rows');
             if (!tbody) return;
@@ -1115,36 +1227,93 @@
                 totalBid += itemTotal;
 
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition";
+                tr.className = "hover:bg-slate-50 transition " + (item.desc.includes("Geocrete") ? "bg-emerald-50/40" : (item.desc.includes("Crusher Chips") ? "bg-amber-50/30" : ""));
                 tr.innerHTML = `
                     <td class="py-3 px-3 font-semibold text-slate-500">${item.id}</td>
-                    <td class="py-3 px-3 font-medium text-slate-800">${item.desc}</td>
+                    <td class="py-3 px-3 font-medium text-slate-800">
+                        <div class="flex items-center space-x-1.5">
+                            <span>${item.desc}</span>
+                        </div>
+                    </td>
                     <td class="py-3 px-3 text-slate-600">${item.qty.toLocaleString()} ${item.unit}</td>
                     <td class="py-3 px-3 text-slate-600">₹ ${item.base - item.margin}</td>
-                    <td class="py-3 px-3 text-slate-600">₹ 0 (Amortized)</td>
+                    <td class="py-3 px-3 text-slate-600">${item.desc.includes("Geocrete") ? "₹ 0 (Amortized)" : (techMode === "conventional_crusher" ? "₹ 0 (Included in Stone)" : "₹ 0")}</td>
                     <td class="py-3 px-3 text-emerald-600 font-semibold">+₹ ${item.margin}</td>
                     <td class="py-3 px-3 text-center">
-                        <button onclick="openBOQBenchmark('${item.id}')" class="text-xs text-blue-700 hover:text-blue-900 font-bold bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-md border border-blue-200 inline-flex items-center space-x-1 transition shadow-sm" title="Click to view historical competitor benchmark">
+                        <button onclick="openBOQBenchmark('${item.id}')" class="text-xs ${item.desc.includes('Geocrete') ? 'text-emerald-700 bg-emerald-50 border-emerald-300' : 'text-blue-700 bg-blue-50 border-blue-200'} hover:opacity-80 font-bold px-2.5 py-1 rounded-md border inline-flex items-center space-x-1 transition shadow-sm" title="Click to view historical competitor benchmark">
                             <span>${item.compRates.Range}</span>
-                            <i class="fa-solid fa-chart-simple text-[10px] text-blue-500"></i>
+                            <i class="fa-solid fa-chart-simple text-[10px]"></i>
                         </button>
                     </td>
-                    <td class="py-3 px-3 font-bold text-blue-700 text-sm">₹ ${quotedRate}</td>
+                    <td class="py-3 px-3 font-bold ${techMode === 'conventional_crusher' ? 'text-rose-700' : (techMode === 'geocrete_stabilization' ? 'text-emerald-700' : 'text-blue-700')} text-sm">₹ ${quotedRate}</td>
                 `;
                 tbody.appendChild(tr);
             });
 
             const estValue = pkg.estValue;
-            const discount = ((totalBid - estValue) / estValue) * 100;
+            const diffPct = ((totalBid - estValue) / estValue) * 100;
             const targetBidEl = document.getElementById('target-bid-quote');
             if (targetBidEl) {
-                targetBidEl.innerText = `₹ ${Math.round(totalBid).toLocaleString()} (${discount >= 0 ? '+' : ''}${discount.toFixed(2)}%)`;
+                targetBidEl.className = "text-lg font-extrabold " + (techMode === 'conventional_crusher' ? 'text-rose-600' : (techMode === 'geocrete_stabilization' ? 'text-emerald-600' : 'text-blue-600'));
+                targetBidEl.innerText = `₹ ${Math.round(totalBid).toLocaleString()} (${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(2)}%)`;
             }
 
             const netProfit = totalBid * (marginPct / 100);
             const netProfitEl = document.getElementById('net-profit-display');
             if (netProfitEl) {
                 netProfitEl.innerText = `₹ ${Math.round(netProfit).toLocaleString()}`;
+            }
+
+            // Update Dynamic Terrain Warning & Impact Banner
+            const banner = document.getElementById('terrain-impact-banner');
+            const badge = document.getElementById('terrain-badge');
+            if (banner) {
+                if (techMode === 'conventional_crusher') {
+                    banner.className = "p-3 rounded-lg border text-xs space-y-1.5 bg-rose-50 border-rose-300 text-rose-900";
+                    banner.innerHTML = `
+                        <div class="flex items-center space-x-1.5 font-bold text-rose-800">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+                            <span>TERRAIN OVERRUN ALERT: Conventional Method Deficit!</span>
+                        </div>
+                        <p class="text-[11px] leading-tight text-slate-700">
+                            At <strong>₹${crusherRate.toLocaleString()}/cum</strong> for crushed aggregate, total conventional execution cost surges to <strong class="text-rose-700 font-extrabold">₹ ${(totalBid/10000000).toFixed(2)} Cr</strong> (+${diffPct.toFixed(1)}% above BRO Sanction of ₹ 13.17 Cr)! Bidding mainland SSR rates guarantees severe contractor default.
+                        </p>
+                    `;
+                    if (badge) {
+                        badge.className = "text-[10px] bg-rose-100 text-rose-800 font-extrabold px-1.5 py-0.5 rounded border border-rose-200 animate-pulse";
+                        badge.innerText = `Crusher Deficit: +${diffPct.toFixed(0)}%`;
+                    }
+                } else if (techMode === 'geocrete_stabilization') {
+                    banner.className = "p-3 rounded-lg border text-xs space-y-1.5 bg-emerald-50 border-emerald-300 text-emerald-900";
+                    banner.innerHTML = `
+                        <div class="flex items-center space-x-1.5 font-bold text-emerald-800">
+                            <i class="fa-solid fa-gem text-emerald-600"></i>
+                            <span>GEOCRETE ADVANTAGE: ₹${crusherRate.toLocaleString()}/cum Crusher Bottleneck Neutralized!</span>
+                        </div>
+                        <p class="text-[11px] leading-tight text-slate-700">
+                            Stabilizing in-situ mountain soil/shale eliminates ~23,000 cum of imported crushed aggregate. Total execution drops to <strong class="text-emerald-700 font-extrabold">₹ ${(totalBid/10000000).toFixed(2)} Cr</strong>, securing a protected <strong class="text-emerald-700 font-extrabold">₹ ${(netProfit/10000000).toFixed(2)} Cr (${marginPct}%) profit</strong> within BRO's ₹ 13.17 Cr sanction!
+                        </p>
+                    `;
+                    if (badge) {
+                        badge.className = "text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded border border-emerald-200";
+                        badge.innerText = `Geocrete Profit: ₹ ${(netProfit/10000000).toFixed(2)} Cr`;
+                    }
+                } else {
+                    banner.className = "p-3 rounded-lg border text-xs space-y-1.5 bg-amber-50 border-amber-300 text-amber-900";
+                    banner.innerHTML = `
+                        <div class="flex items-center space-x-1.5 font-bold text-amber-800">
+                            <i class="fa-solid fa-circle-info text-amber-600"></i>
+                            <span>Mainland SSR Baseline (Uncalibrated)</span>
+                        </div>
+                        <p class="text-[11px] leading-tight text-slate-700">
+                            Assumes mainland quarry aggregate @ ₹2,200/cum. Unrealistic for Pushpak mountain terrain where crusher works cost ₹6,600/cum without Geocrete in-situ stabilization.
+                        </p>
+                    `;
+                    if (badge) {
+                        badge.className = "text-[10px] bg-amber-100 text-amber-800 font-extrabold px-1.5 py-0.5 rounded border border-amber-200";
+                        badge.innerText = `Mainland Baseline`;
+                    }
+                }
             }
 
             recalculateHaulage();
@@ -1817,10 +1986,21 @@
             <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 space-y-1">
                 <div class="font-bold flex items-center space-x-1">
                     <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                    <span>Why LSR's Lower Rate Retains a 20.0% Net Profit:</span>
+                    <span>Why LSR's Rate Retains Full Net Profit:</span>
                 </div>
                 <p class="text-[11px] leading-relaxed text-emerald-800">
-                    Competitors add a ₹40–55/Sqm third-party trailer rental markup to transport VG-30 bitumen and aggregates across mountain passes. Our <strong>11 captive multi-axle trailers</strong> eliminate this rental cost entirely, enabling us to quote below market while capturing full net profit.
+                    Competitors add heavy rental markups to transport VG-30 bitumen and aggregates across mountain passes. Our <strong>11 captive multi-axle trailers</strong> eliminate rental costs entirely, capturing full margin.
+                </p>
+            </div>
+
+            <!-- Terrain & Crusher Supply Reality in Mountain Corridor -->
+            <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-1">
+                <div class="font-bold flex items-center space-x-1 text-amber-800">
+                    <i class="fa-solid fa-mountain text-amber-600"></i>
+                    <span>Terrain Driver: Crusher Supply @ ~₹6,600 / cum in Pushpak Sector</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-slate-700">
+                    Local shale rock cannot yield high-CBR crushed aggregates. Recent BRO supply contracts in Zawngling/Kalchaw are allotted at <strong>~₹6,600/cum</strong>. Conventional WMM/DBM using imported aggregate drives total package cost up to <strong>₹25.21 Cr (+91.4% deficit)</strong>. <strong>LSR Geocrete In-Situ Soil Stabilization</strong> eliminates imported crushed stone entirely, locking in protected profit within the ₹13.17 Cr budget.
                 </p>
             </div>
 

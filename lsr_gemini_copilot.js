@@ -175,6 +175,7 @@
 
             <!-- Quick Action Chips -->
             <div class="px-3 py-2 bg-white border-t border-slate-100 flex items-center space-x-1.5 overflow-x-auto text-[11px] scrollbar-none">
+                <span class="copilot-chip bg-rose-50 text-rose-800 border-rose-300 font-bold" data-cmd="Explain terrain impact and crusher rate of 6600 per cum in Mizoram">⛰️ ₹6,600 Crusher Impact</span>
                 <span class="copilot-chip" data-cmd="Show ongoing and completed works for CCL International">🏢 CCL Ongoing Works</span>
                 <span class="copilot-chip" data-cmd="Analyze BOQ for Mizoram Lawngtlai project">📋 Analyze Mizoram BOQ</span>
                 <span class="copilot-chip" data-cmd="Show AI Fit Score for Chamoli tender">🎯 Chamoli Fit Score</span>
@@ -361,6 +362,31 @@
                     <div>• <strong>Key Edge</strong>: Zero third-party trailer rental charges thanks to our 11 captive multi-axle trailers.</div>
                 </div>
                 <div class="text-[11px] text-slate-500 mt-1">Detailed comparison modal opened on your screen.</div>
+            `);
+            return;
+        }
+
+        // 0B-2. Check if user asks about Crusher Rates, Terrain Fault, or Supply Works at ₹6,600/cum
+        if (qLower.includes('crusher') || qLower.includes('6600') || qLower.includes('terrain') || qLower.includes('fault') || (qLower.includes('rate') && (qLower.includes('mizoram') || qLower.includes('pushpak') || qLower.includes('stone') || qLower.includes('chips')))) {
+            if (typeof switchTab === 'function') switchTab('boq');
+
+            const crusherEl = document.getElementById('crusher-rate');
+            if (crusherEl) crusherEl.value = 6600;
+
+            if (typeof recalculateBOQ === 'function') recalculateBOQ();
+
+            appendBotMessage(`
+                <div><strong>⛰️ Terrain & Crusher Supply Ground Reality Calibrated</strong></div>
+                <div class="action-card" style="background:#fff1f2; border-color:#fecdd3; color:#9f1239;">
+                    <div>• <strong>Terrain Reality</strong>: In Southern Mizoram (BRO Project Pushpak / Lawngtlai / Kalchaw), local rock is fragile shale. Hard stone aggregates cannot be quarried locally.</div>
+                    <div>• <strong>Verified Allotment Rate</strong>: Recent BRO contracts for supply of crusher materials/chips (e.g. Zawngling-Mawhre) have been allotted at <strong>~₹6,600 per cum</strong>.</div>
+                    <div>• <strong>The Conventional Deficit</strong>: A conventional WMM + DBM road requires ~23,000 cum of crushed stone. At ₹6,600/cum, stone alone costs ₹15.18 Cr, driving total execution to <strong>₹25.21 Cr (+91.4% above BRO's ₹13.17 Cr sanction)</strong>! Standard mainland bidding leads to guaranteed default.</div>
+                </div>
+                <div class="action-card" style="background:#ecfdf5; border-color:#a7f3d0; color:#065f46; margin-top:6px;">
+                    <div>• <strong>💎 The Geocrete Solution</strong>: By deploying <strong>Geocrete In-Situ Soil Stabilization</strong>, the local subgrade/soil is stabilized directly with cement and nano-additives.</div>
+                    <div>• <strong>Result</strong>: Eliminates ~23,000 cum of imported stone, drops total project cost to <strong>₹11.15 Cr</strong>, and locks in a protected <strong>₹2.02 Cr (20% Net Profit)</strong> within the ₹13.17 Cr budget.</div>
+                </div>
+                <div class="text-[11px] text-slate-500 mt-1">Switched to BOQ tab and calibrated the ₹6,600/cum crusher supply impact.</div>
             `);
             return;
         }
