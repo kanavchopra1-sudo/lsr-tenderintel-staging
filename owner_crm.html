@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LSR Infracon - Owner & Managing Director Command Center</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .tab-btn-active { background-color: #0f172a; color: #ffffff; border-bottom: 3px solid #f59e0b; font-weight: 700; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.12); }
+        .gold-glow { box-shadow: 0 0 15px rgba(245, 158, 11, 0.25); }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
+
+    <!-- Top Executive Corporate Ribbon -->
+    <div class="bg-slate-950 text-slate-400 text-[11px] py-1.5 px-4 sm:px-8 border-b border-slate-800 flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+            <span class="text-amber-400 font-bold tracking-wider uppercase"><i class="fa-solid fa-certificate mr-1"></i> Class-1 Super Special Highway Contractor</span>
+            <span class="hidden md:inline text-slate-600">|</span>
+            <span class="hidden md:inline text-slate-300">CIN: U45100CH2005PTC028727</span>
+            <span class="hidden md:inline text-slate-600">|</span>
+            <span class="hidden md:inline text-slate-300">HQ: Tower B, Godrej Eternia, Ind Area Phase 1, Chandigarh</span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <span class="flex items-center text-emerald-400 font-semibold"><span class="w-2 h-2 bg-emerald-400 rounded-full animate-ping mr-1.5"></span> Live Telemetry Active</span>
+            <span class="text-slate-600">|</span>
+            <span class="text-slate-300 font-mono" id="live-clock"></span>
+        </div>
+    </div>
+
+    <!-- Main Owner Header Bar -->
+    <header class="bg-white text-slate-900 shadow-md border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
+            <!-- Official Brand Logo & Identity -->
+            <div class="flex items-center space-x-4">
+                <a href="owner_crm.html" class="flex items-center space-x-3">
+                    <img src="lsr_official_logo.png" alt="LSR Official Logo" class="h-14 w-auto object-contain drop-shadow-sm">
+                </a>
+                <div class="hidden sm:block border-l border-slate-200 pl-4 py-1">
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-slate-900 text-amber-400 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider gold-glow">
+                            <i class="fa-solid fa-crown mr-1"></i> Amit Singla, MD
+                        </span>
+                        <span class="text-xs font-bold text-slate-700">Executive Command Center</span>
+                    </div>
+                    <div class="text-[11px] text-slate-500 font-medium italic">"Connecting communities with vital, long-term infrastructure"</div>
+                </div>
+            </div>
+
+            <!-- Action Controls & Bidding Hub Switcher -->
+            <div class="flex items-center space-x-3">
+                <button onclick="triggerQuickAction('diesel')" class="hidden lg:flex items-center space-x-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm">
+                    <i class="fa-solid fa-gas-pump text-amber-600"></i>
+                    <span>Approve Fuel Indent</span>
+                </button>
+
+                <button onclick="triggerQuickAction('bg')" class="hidden md:flex items-center space-x-1.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm">
+                    <i class="fa-solid fa-file-signature text-purple-600"></i>
+                    <span>Sign EMD / BG</span>
+                </button>
+
+                <a href="index.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow-md transition flex items-center space-x-2">
+                    <i class="fa-solid fa-crosshairs text-slate-200"></i>
+                    <span>Tender Bidding Subsystem</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Vertical Navigation Switcher -->
+    <nav class="bg-slate-900 text-white shadow-inner sticky top-20 z-40 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 py-1.5 overflow-x-auto">
+            <button onclick="switchVertical('cockpit')" id="vtab-cockpit" class="tab-btn-active px-4 py-2.5 rounded-lg text-xs font-medium transition flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-gauge-high text-amber-400"></i>
+                <span>Owner Cockpit (360° MIS)</span>
+            </button>
+            <button onclick="switchVertical('treasury')" id="vtab-treasury" class="text-slate-300 hover:bg-slate-800 px-4 py-2.5 rounded-lg text-xs font-medium transition flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-vault text-emerald-400"></i>
+                <span>Bank Accounts & Treasury</span>
+            </button>
+            <button onclick="switchVertical('projects')" id="vtab-projects" class="text-slate-300 hover:bg-slate-800 px-4 py-2.5 rounded-lg text-xs font-medium transition flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-road text-blue-400"></i>
+                <span>Active Sites & RA Bills</span>
+            </button>
+            <button onclick="switchVertical('fleet')" id="vtab-fleet" class="text-slate-300 hover:bg-slate-800 px-4 py-2.5 rounded-lg text-xs font-medium transition flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-truck-monster text-amber-400"></i>
+                <span>11 Trailers & HMP Plants</span>
+            </button>
+            <button onclick="switchVertical('legal')" id="vtab-legal" class="text-slate-300 hover:bg-slate-800 px-4 py-2.5 rounded-lg text-xs font-medium transition flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-scale-balanced text-purple-400"></i>
+                <span>Bank Guarantees & Legal</span>
+            </button>
+            <button onclick="switchVertical('hr')" id="vtab-hr" class="text-slate-300 hover:bg-slate-800 px-4 py-2.5 rounded-lg text-xs font-medium transition flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-users-gear text-rose-400"></i>
+                <span>Site Camps & Muster Roll</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main App Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+
+        <!-- ============================================================== -->
+        <!-- VERTICAL 1: OWNER 360 COCKPIT                                 -->
+        <!-- ============================================================== -->
+        <div id="view-cockpit" class="space-y-6">
+
+            <!-- High Level KPI Strip -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <!-- KPI 1 -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm card-hover transition">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase">Live Bidding Pipeline</span>
+                        <span class="p-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs"><i class="fa-solid fa-crosshairs"></i></span>
+                    </div>
+                    <div class="text-xl font-black text-slate-900 mt-2">₹ 284.2 Cr</div>
+                    <div class="text-[11px] text-emerald-600 font-semibold mt-1">14 Packages / 8 States</div>
+                </div>
+
+                <!-- KPI 2 -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm card-hover transition">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase">Works in Hand</span>
+                        <span class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs"><i class="fa-solid fa-helmet-safety"></i></span>
+                    </div>
+                    <div class="text-xl font-black text-slate-900 mt-2">₹ 74.8 Cr</div>
+                    <div class="text-[11px] text-blue-600 font-semibold mt-1">3 Live Road Contracts</div>
+                </div>
+
+                <!-- KPI 3 -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm card-hover transition">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase">Net Profit Margin</span>
+                        <span class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs"><i class="fa-solid fa-lock"></i></span>
+                    </div>
+                    <div class="text-xl font-black text-emerald-600 mt-2">20.4 %</div>
+                    <div class="text-[11px] text-emerald-700 font-semibold mt-1">₹ 15.2 Cr Est. EBITDA</div>
+                </div>
+
+                <!-- KPI 4 -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm card-hover transition">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase">Liquid Bank Balance</span>
+                        <span class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs"><i class="fa-solid fa-building-columns"></i></span>
+                    </div>
+                    <div class="text-xl font-black text-slate-900 mt-2">₹ 4.12 Cr</div>
+                    <div class="text-[11px] text-slate-500 font-semibold mt-1">Punjab National Bank</div>
+                </div>
+
+                <!-- KPI 5 -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm card-hover transition">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase">Fleet Machinery</span>
+                        <span class="p-1.5 bg-amber-50 text-amber-600 rounded-lg text-xs"><i class="fa-solid fa-truck-moving"></i></span>
+                    </div>
+                    <div class="text-xl font-black text-slate-900 mt-2">85.7 %</div>
+                    <div class="text-[11px] text-slate-600 font-semibold mt-1">24 of 28 Units Active</div>
+                </div>
+
+                <!-- KPI 6 -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm card-hover transition">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase">Site Muster Roll</span>
+                        <span class="p-1.5 bg-rose-50 text-rose-600 rounded-lg text-xs"><i class="fa-solid fa-users"></i></span>
+                    </div>
+                    <div class="text-xl font-black text-slate-900 mt-2">184 Pers</div>
+                    <div class="text-[11px] text-emerald-600 font-semibold mt-1">Zero Safety Incidents</div>
+                </div>
+            </div>
+
+            <!-- Weather & Remote Ground Status Strip (Real Mountain Construction Context) -->
+            <div class="bg-slate-900 text-white p-4 rounded-xl shadow-md border border-slate-800">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-cloud-sun-rain text-amber-400 mr-2 text-sm"></i>
+                        Live Mountain Ground Weather & Laying Conditions
+                    </span>
+                    <span class="text-[11px] text-slate-400">Satellite Met Update: 15m ago</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-white text-sm">Chamoli (BRO Shivalik)</div>
+                            <div class="text-slate-400 mt-0.5">Joshimath-Badrinath KM 18-42</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-emerald-400 font-black text-base">12°C</div>
+                            <span class="bg-emerald-500/20 text-emerald-300 text-[10px] px-2 py-0.5 rounded font-bold">Paving Optimal</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-white text-sm">Lawngtlai (BRO Pushpak)</div>
+                            <div class="text-slate-400 mt-0.5">Mizoram K-P-T Road (Target 08-Oct)</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-amber-400 font-black text-base">24°C</div>
+                            <span class="bg-blue-500/20 text-blue-300 text-[10px] px-2 py-0.5 rounded font-bold">Clear / Mobilizing</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-white text-sm">Nagpur (Maha PWD)</div>
+                            <div class="text-slate-400 mt-0.5">State Highway 114 Widening</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-amber-400 font-black text-base">31°C</div>
+                            <span class="bg-emerald-500/20 text-emerald-300 text-[10px] px-2 py-0.5 rounded font-bold">DBM Shift Active</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-white text-sm">Varanasi (UPRRDA FDR)</div>
+                            <div class="text-slate-400 mt-0.5">PMGSY-III Stabilization Pkg 18</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-white font-black text-base">28°C</div>
+                            <span class="bg-emerald-500/20 text-emerald-300 text-[10px] px-2 py-0.5 rounded font-bold">Final Rolling</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Urgent Decision Queue + P&L Bar Chart -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Critical Owner Action Queue -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center justify-between border-b pb-2">
+                        <span class="flex items-center space-x-2">
+                            <i class="fa-solid fa-bell text-rose-500"></i>
+                            <span>Executive Attention Queue (High Stakes)</span>
+                        </span>
+                        <span class="bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.5 rounded-full">3 Pending</span>
+                    </h3>
+                    
+                    <div class="space-y-2.5 text-xs">
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 flex items-start space-x-2.5">
+                            <i class="fa-solid fa-clock text-amber-600 mt-0.5"></i>
+                            <div>
+                                <div class="font-bold">Mizoram BRO Tender 787576 (Due 08-Oct)</div>
+                                <div class="text-[11px] text-amber-800 mt-0.5">Physical EMD FDR of ₹9,83,360 must reach HQ CE Pushpak (SBI Bawnkawn Code 7059) by Thursday 18:00 IST.</div>
+                                <button onclick="window.location.href='index.html'" class="mt-1.5 text-[11px] text-blue-700 font-bold underline">Review & Export Populated BOQ &rarr;</button>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-900 flex items-start space-x-2.5">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-600 mt-0.5"></i>
+                            <div>
+                                <div class="font-bold">PBG Expiry Notice: Varanasi PMGSY FDR</div>
+                                <div class="text-[11px] text-rose-800 mt-0.5">Performance BG of ₹68.00 Lakhs expires in 18 days (22-Oct). Extension request ready for MD digital sign.</div>
+                                <button onclick="triggerQuickAction('bg')" class="mt-1.5 text-[11px] text-purple-700 font-bold underline">Review Extension & Sign &rarr;</button>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 flex items-start space-x-2.5">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
+                            <div>
+                                <div class="font-bold">RA Bill #04 Realized: Chamoli Project Shivalik</div>
+                                <div class="text-[11px] text-emerald-800 mt-0.5">₹2.15 Crores passed by Executive Engineer BRO; net amount credited to PNB Current Account.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Financial Runway & Net Margin Chart -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-2 space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm">FY 2026-27 Revenue Billing vs Direct Cost vs Net Margin</h3>
+                            <p class="text-xs text-slate-400">Monthly Cash Realization Across All Active Highway Packages (₹ Crores)</p>
+                        </div>
+                        <span class="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
+                            20.4% Protected EBITDA
+                        </span>
+                    </div>
+                    <div class="h-60">
+                        <canvas id="ownerFinancialChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LSR Corporate Heritage & Historic BRO Milestone Track Record -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-2 gap-2">
+                    <div class="flex items-center space-x-3">
+                        <img src="lsr_official_logo.png" alt="LSR Excavator Logo" class="h-10 w-auto object-contain">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm">LSR Infracon Proven Track Record (Since 2005)</h3>
+                            <p class="text-xs text-slate-500">20+ Years in High-Altitude Border Roads, PMGSY FDR & Heavy Logistics</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 text-xs">
+                        <span class="bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded border border-slate-200">
+                            <strong>MD:</strong> Amit Singla
+                        </span>
+                        <span class="bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded border border-slate-200">
+                            <strong>Director:</strong> Loveleen Dhaliwal Singla
+                        </span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="font-bold text-blue-900 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-mountain text-blue-600"></i>
+                            <span>Project Deepak (Himachal Pradesh)</span>
+                        </div>
+                        <p class="text-slate-600 mt-1 text-[11px]">Pooh-Kaurik Road & Pong Point 4840 under 108 RCC / 759 BRTF. High altitude alpine bituminous execution.</p>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="font-bold text-amber-900 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-route text-amber-600"></i>
+                            <span>Project Shivalik (Uttarakhand)</span>
+                        </div>
+                        <p class="text-slate-600 mt-1 text-[11px]">Sumna-Rimkhim Road under 123 RCC / 21 BRTF border axis. Surfacing & rock slope stabilization.</p>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="font-bold text-emerald-900 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-gears text-emerald-600"></i>
+                            <span>Specialized In-House Equipment</span>
+                        </div>
+                        <p class="text-slate-600 mt-1 text-[11px]">In-Situ Soil Stabilizers, Wirtgen Recyclers, Sensor Pavers & 11-Trailer Heavy Haul Fleet mobilized from Chandigarh.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multi-Site Progress & Measurement Book (MB) Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-road-bridge text-blue-600"></i>
+                            <span>Live Road Contract Execution & RA Bill Realization</span>
+                        </h3>
+                        <p class="text-xs text-slate-400">Field measurements recorded in Departmental Measurement Books (MB)</p>
+                    </div>
+                    <span class="text-xs text-slate-500 font-medium">Auto-synced from Site DPRs</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="py-3 px-4">Project Package & Client</th>
+                                <th class="py-3 px-4">Location / Terrain</th>
+                                <th class="py-3 px-4">Contract Value</th>
+                                <th class="py-3 px-4">Physical Progress</th>
+                                <th class="py-3 px-4 font-bold text-emerald-700">RA Billed / Realized</th>
+                                <th class="py-3 px-4">Bitumen Stock</th>
+                                <th class="py-3 px-4">Site In-Charge</th>
+                                <th class="py-3 px-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr class="hover:bg-slate-50">
+                                <td class="py-3.5 px-4">
+                                    <div class="font-bold text-slate-900 text-sm">Joshimath-Badrinath Resurfacing (KM 18-42)</div>
+                                    <div class="text-[11px] text-slate-400">BRO Project Shivalik / 21 BRTF</div>
+                                </td>
+                                <td class="py-3.5 px-4 font-medium text-slate-700">Chamoli, Uttarakhand</td>
+                                <td class="py-3.5 px-4 font-bold text-slate-900">₹ 21.60 Cr</td>
+                                <td class="py-3.5 px-4">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-24 bg-slate-200 rounded-full h-2">
+                                            <div class="bg-blue-600 h-2 rounded-full" style="width: 78%"></div>
+                                        </div>
+                                        <span class="font-bold text-slate-800">78%</span>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-4 font-bold text-emerald-600 text-sm">₹ 16.85 Cr</td>
+                                <td class="py-3.5 px-4 text-slate-700 font-semibold">42 MT VG-30</td>
+                                <td class="py-3.5 px-4 text-slate-700 font-medium">Er. Rajesh Sharma</td>
+                                <td class="py-3.5 px-4">
+                                    <button onclick="alert('Viewing Daily Progress Report for Chamoli Project Shivalik...')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2.5 py-1 rounded text-[11px] font-bold">
+                                        View DPR
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-slate-50">
+                                <td class="py-3.5 px-4">
+                                    <div class="font-bold text-slate-900 text-sm">UPFDR Soil Stabilization Batch 18</div>
+                                    <div class="text-[11px] text-slate-400">UPRRDA PMGSY-III</div>
+                                </td>
+                                <td class="py-3.5 px-4 font-medium text-slate-700">Varanasi / Mirzapur, UP</td>
+                                <td class="py-3.5 px-4 font-bold text-slate-900">₹ 14.30 Cr</td>
+                                <td class="py-3.5 px-4">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-24 bg-slate-200 rounded-full h-2">
+                                            <div class="bg-blue-600 h-2 rounded-full" style="width: 92%"></div>
+                                        </div>
+                                        <span class="font-bold text-slate-800">92%</span>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-4 font-bold text-emerald-600 text-sm">₹ 13.15 Cr</td>
+                                <td class="py-3.5 px-4 text-slate-700 font-semibold">18 MT Emulsion</td>
+                                <td class="py-3.5 px-4 text-slate-700 font-medium">Er. Amit Verma</td>
+                                <td class="py-3.5 px-4">
+                                    <button onclick="alert('Viewing Final Bill Settlement for Varanasi PMGSY...')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2.5 py-1 rounded text-[11px] font-bold">
+                                        Final Bill
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-slate-50">
+                                <td class="py-3.5 px-4">
+                                    <div class="font-bold text-slate-900 text-sm">Nagpur-Wardha State Highway Widening</div>
+                                    <div class="text-[11px] text-slate-400">Maharashtra PWD</div>
+                                </td>
+                                <td class="py-3.5 px-4 font-medium text-slate-700">Nagpur, Maharashtra</td>
+                                <td class="py-3.5 px-4 font-bold text-slate-900">₹ 38.90 Cr</td>
+                                <td class="py-3.5 px-4">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-24 bg-slate-200 rounded-full h-2">
+                                            <div class="bg-amber-500 h-2 rounded-full" style="width: 44%"></div>
+                                        </div>
+                                        <span class="font-bold text-slate-800">44%</span>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-4 font-bold text-emerald-600 text-sm">₹ 17.10 Cr</td>
+                                <td class="py-3.5 px-4 text-slate-700 font-semibold">65 MT VG-40</td>
+                                <td class="py-3.5 px-4 text-slate-700 font-medium">Er. Sanjay Patel</td>
+                                <td class="py-3.5 px-4">
+                                    <button onclick="alert('Viewing Sensor Paver Real-time Laying Metrics...')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2.5 py-1 rounded text-[11px] font-bold">
+                                        Sensor Paver
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- VERTICAL 2: TREASURY & BANK LIQUIDITY                          -->
+        <!-- ============================================================== -->
+        <div id="view-treasury" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+                        <span>Current Bank Accounts</span>
+                        <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Reconciled Today</span>
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-slate-800 text-xs">Punjab National Bank (Current A/c)</span>
+                                <span class="text-xs text-slate-400">Godrej Eternia, Chd</span>
+                            </div>
+                            <div class="text-lg font-black text-emerald-600 mt-1">₹ 4,12,40,550</div>
+                            <div class="text-[11px] text-slate-500 mt-0.5">Primary Operations & RA Credit</div>
+                        </div>
+
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-slate-800 text-xs">HDFC Bank (Cash Credit Limit)</span>
+                                <span class="text-xs text-slate-400">Working Capital</span>
+                            </div>
+                            <div class="text-lg font-black text-slate-800 mt-1">₹ 88,40,000 <span class="text-xs font-normal text-slate-500">avail of ₹1.5 Cr</span></div>
+                            <div class="text-[11px] text-slate-500 mt-0.5">Clause 6a Certified Facility</div>
+                        </div>
+
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-slate-800 text-xs">State Bank of India (FDR Collateral)</span>
+                                <span class="text-xs text-slate-400">BGs & EMDs</span>
+                            </div>
+                            <div class="text-lg font-black text-blue-700 mt-1">₹ 5,20,00,000</div>
+                            <div class="text-[11px] text-slate-500 mt-0.5">Under Lien to BRO Pushpak & UPRRDA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2 space-y-4">
+                    <h3 class="font-bold text-slate-900 text-base border-b pb-2">Government Department Retention Money Status</h3>
+                    <p class="text-xs text-slate-500">Security deposits held by clients until Defect Liability Period (DLP) completion</p>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-600">
+                            <thead class="bg-slate-100 text-slate-700 font-semibold uppercase">
+                                <tr>
+                                    <th class="py-2.5 px-3">Contract Authority</th>
+                                    <th class="py-2.5 px-3">Project Title</th>
+                                    <th class="py-2.5 px-3 font-bold text-slate-900">Locked Retention (₹)</th>
+                                    <th class="py-2.5 px-3">DLP Expiry</th>
+                                    <th class="py-2.5 px-3">Release Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr>
+                                    <td colspan="5" class="py-6 px-4 text-center text-slate-500">
+                                        <div class="flex flex-col items-center justify-center space-y-2">
+                                            <i class="fa-solid fa-file-shield text-2xl text-slate-400"></i>
+                                            <p class="font-medium text-slate-700">No Verified Retention Data Uploaded</p>
+                                            <p class="text-[11px] text-slate-400 max-w-md">Upload Form 26AS, Bank Guarantee registers, or 3CP Client Completion Certificates to track active retention and DLP expiry schedules.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- VERTICAL 3: 11-TRAILER FLEET & P&M                            -->
+        <!-- ============================================================== -->
+        <div id="view-fleet" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Fleet Telemetry Summary -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+                        <span>P&M Asset Telemetry</span>
+                        <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">24 / 28 Online</span>
+                    </h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg">
+                            <span class="font-semibold text-slate-700">11-Trailer Heavy Haul Fleet:</span>
+                            <span class="font-bold text-blue-700">4 In-Transit | 7 At Site</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg">
+                            <span class="font-semibold text-slate-700">Hot Mix Plant (HMP 60 TPH #1):</span>
+                            <span class="font-bold text-emerald-700">Active (Chamoli Camp)</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg">
+                            <span class="font-semibold text-slate-700">Hot Mix Plant (HMP 60 TPH #2):</span>
+                            <span class="font-bold text-amber-700">Standby (Chandigarh Yard)</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg">
+                            <span class="font-semibold text-slate-700">Vögele Sensor Paver:</span>
+                            <span class="font-bold text-emerald-700">Operating (Nagpur Site)</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg">
+                            <span class="font-semibold text-slate-700">Diesel Consumption Index:</span>
+                            <span class="font-bold text-emerald-600">3.8 L/Sqm (Optimal)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Machinery Fleet Table -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-2 space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-slate-900 text-base">Key Equipment Real-Time Allocation</h3>
+                        <span class="text-xs text-slate-400">GPS & Maintenance Tracked</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-600">
+                            <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                                <tr>
+                                    <th class="py-2.5 px-3">Equipment / Reg #</th>
+                                    <th class="py-2.5 px-3">Type & Capacity</th>
+                                    <th class="py-2.5 px-3">Assigned Project</th>
+                                    <th class="py-2.5 px-3">Operating Hrs</th>
+                                    <th class="py-2.5 px-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold text-slate-800">LSR-HMP-01</td>
+                                    <td class="py-2.5 px-3">Apollo Asphalt Batching 60 TPH</td>
+                                    <td class="py-2.5 px-3">Chamoli, Uttarakhand</td>
+                                    <td class="py-2.5 px-3">2,410 hrs</td>
+                                    <td class="py-2.5 px-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Producing</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold text-slate-800">LSR-PVR-02</td>
+                                    <td class="py-2.5 px-3">Vögele Super 1800-3 Sensor Paver</td>
+                                    <td class="py-2.5 px-3">Nagpur Highway, MH</td>
+                                    <td class="py-2.5 px-3">1,890 hrs</td>
+                                    <td class="py-2.5 px-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Laying DBM</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold text-slate-800">LSR-TRL-01 to 04</td>
+                                    <td class="py-2.5 px-3">40-Ft Multi-Axle Heavy Trailers (x4)</td>
+                                    <td class="py-2.5 px-3">Chandigarh ➔ Mizoram Route</td>
+                                    <td class="py-2.5 px-3">En Route (Siliguri)</td>
+                                    <td class="py-2.5 px-3"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">Transit</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold text-slate-800">LSR-ROL-03</td>
+                                    <td class="py-2.5 px-3">Hamm Tandem Vibratory Roller 10 Ton</td>
+                                    <td class="py-2.5 px-3">Varanasi UPFDR</td>
+                                    <td class="py-2.5 px-3">3,120 hrs</td>
+                                    <td class="py-2.5 px-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Compacting</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- VERTICAL 4: LEGAL & BANK GUARANTEES (BG)                       -->
+        <!-- ============================================================== -->
+        <div id="view-legal" class="hidden space-y-6">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Bank Guarantees (BG) & Statutory Compliance Vault</h3>
+                        <p class="text-xs text-slate-400">Active EMDs, Performance Securities & Mining Leases</p>
+                    </div>
+                    <button onclick="triggerQuickAction('bg')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow">
+                        + Issue New BG Request
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="py-3 px-3">BG Ref / Instrument</th>
+                                <th class="py-3 px-3">Beneficiary Department</th>
+                                <th class="py-3 px-3">Bank & Branch</th>
+                                <th class="py-3 px-3 font-bold text-slate-900">Amount</th>
+                                <th class="py-3 px-3">Issue Date</th>
+                                <th class="py-3 px-3">Expiry Date</th>
+                                <th class="py-3 px-3 font-bold text-rose-600">Days Remaining</th>
+                                <th class="py-3 px-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr class="bg-rose-50/50">
+                                <td class="py-3 px-3 font-bold text-slate-900">BG-PBG-2024-8812</td>
+                                <td class="py-3 px-3 font-semibold text-slate-800">UPRRDA (PMGSY UP FDR Pkg 12)</td>
+                                <td class="py-3 px-3">HDFC Bank, Industrial Area Phase 1, Chandigarh</td>
+                                <td class="py-3 px-3 font-bold text-slate-900">₹ 68,00,000</td>
+                                <td class="py-3 px-3 text-slate-500">24-Oct-2024</td>
+                                <td class="py-3 px-3 font-bold text-rose-600">22-Oct-2026</td>
+                                <td class="py-3 px-3 font-black text-rose-600">18 Days (URGENT)</td>
+                                <td class="py-3 px-3"><span class="bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded">Renew Pending</span></td>
+                            </tr>
+
+                            <tr>
+                                <td class="py-3 px-3 font-bold text-slate-900">FDR-EMD-2026-991</td>
+                                <td class="py-3 px-3 font-semibold text-slate-800">HQ CE Project Pushpak (Mizoram)</td>
+                                <td class="py-3 px-3">SBI Bawnkawn (Code: 7059)</td>
+                                <td class="py-3 px-3 font-bold text-slate-900">₹ 9,83,360</td>
+                                <td class="py-3 px-3 text-slate-500">02-Oct-2026</td>
+                                <td class="py-3 px-3 font-bold text-slate-700">02-Oct-2027</td>
+                                <td class="py-3 px-3 text-slate-600">363 Days</td>
+                                <td class="py-3 px-3"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Active EMD</span></td>
+                            </tr>
+
+                            <tr>
+                                <td class="py-3 px-3 font-bold text-slate-900">BG-PBG-2025-104</td>
+                                <td class="py-3 px-3 font-semibold text-slate-800">BRO Project Shivalik (Chamoli)</td>
+                                <td class="py-3 px-3">Punjab National Bank, Chandigarh</td>
+                                <td class="py-3 px-3 font-bold text-slate-900">₹ 1,08,00,000</td>
+                                <td class="py-3 px-3 text-slate-500">15-Feb-2025</td>
+                                <td class="py-3 px-3 font-bold text-slate-700">14-Feb-2027</td>
+                                <td class="py-3 px-3 text-slate-600">132 Days</td>
+                                <td class="py-3 px-3"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Healthy</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- VERTICAL 5: SITE HR & MUSTER ROLL                             -->
+        <!-- ============================================================== -->
+        <div id="view-hr" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Roster Stats -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <h3 class="font-bold text-slate-900 text-sm border-b pb-2">Today's Headcount Summary</h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <span class="text-slate-500">Chandigarh HQ:</span>
+                            <span class="font-bold text-slate-900">18 Present</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <span class="text-slate-500">Chamoli Hill Camp:</span>
+                            <span class="font-bold text-slate-900">46 Present</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <span class="text-slate-500">Nagpur Highway Camp:</span>
+                            <span class="font-bold text-slate-900">68 Present</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <span class="text-slate-500">Varanasi FDR Camp:</span>
+                            <span class="font-bold text-slate-900">52 Present</span>
+                        </div>
+                        <div class="flex justify-between pt-1">
+                            <span class="font-bold text-slate-800">Total Deployment:</span>
+                            <span class="font-black text-blue-700 text-sm">184 Personnel</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Labor Muster Roll (DLR) Table -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-3 space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-slate-900 text-base">Key Site In-Charges & Machine Operators (Live Roster)</h3>
+                        <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">Daily Geo-Tagged</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-600">
+                            <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                                <tr>
+                                    <th class="py-2.5 px-3">Name & ID</th>
+                                    <th class="py-2.5 px-3">Role</th>
+                                    <th class="py-2.5 px-3">Location / Camp</th>
+                                    <th class="py-2.5 px-3">Check-in Time</th>
+                                    <th class="py-2.5 px-3">Monthly Wage / Rate</th>
+                                    <th class="py-2.5 px-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold text-slate-900">Er. Rajesh Sharma</td>
+                                    <td class="py-2.5 px-3 font-semibold text-blue-700">Project Manager</td>
+                                    <td class="py-2.5 px-3">Chamoli, Uttarakhand</td>
+                                    <td class="py-2.5 px-3">07:42 AM IST</td>
+                                    <td class="py-2.5 px-3 font-semibold text-slate-800">₹ 85,000 / mo</td>
+                                    <td class="py-2.5 px-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">On Duty</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold text-slate-900">Gurdeep Singh</td>
+                                    <td class="py-2.5 px-3 font-semibold text-amber-700">HMP Batch Plant Master</td>
+                                    <td class="py-2.5 px-3">Chamoli HMP Yard</td>
+                                    <td class="py-2.5 px-3">06:55 AM IST</td>
+                                    <td class="py-2.5 px-3 font-semibold text-slate-800">₹ 45,000 / mo</td>
+                                    <td class="py-2.5 px-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">On Duty</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold text-slate-900">Manoj Kumar</td>
+                                    <td class="py-2.5 px-3 font-semibold text-purple-700">Vögele Sensor Paver Operator</td>
+                                    <td class="py-2.5 px-3">Nagpur Site</td>
+                                    <td class="py-2.5 px-3">08:10 AM IST</td>
+                                    <td class="py-2.5 px-3 font-semibold text-slate-800">₹ 38,000 / mo</td>
+                                    <td class="py-2.5 px-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">On Duty</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-400 text-xs py-5 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <img src="lsr_logo.svg" alt="LSR Logo" class="h-6 w-auto grayscale opacity-70">
+                <span>LSR Infracon Private Limited &copy; 2026. Confidential Owner & Board Access.</span>
+            </div>
+            <div class="text-slate-500">
+                Protected with 256-bit Digital Signature Encryption • Server: Chandigarh Private LAN
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Script -->
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const el = document.getElementById('live-clock');
+            if (el) el.innerText = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + now.toLocaleTimeString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function switchVertical(vertId) {
+            ['cockpit', 'treasury', 'projects', 'fleet', 'legal', 'hr'].forEach(id => {
+                const el = document.getElementById(`view-${id}`);
+                const btn = document.getElementById(`vtab-${id}`);
+                if (el) el.classList.add('hidden');
+                if (btn) {
+                    btn.classList.remove('tab-btn-active');
+                    btn.classList.add('text-slate-300');
+                }
+            });
+
+            const activeEl = document.getElementById(`view-${vertId}`) || document.getElementById('view-cockpit');
+            const activeBtn = document.getElementById(`vtab-${vertId}`) || document.getElementById('vtab-cockpit');
+            
+            if (activeEl) activeEl.classList.remove('hidden');
+            if (activeBtn) {
+                activeBtn.classList.add('tab-btn-active');
+                activeBtn.classList.remove('text-slate-300');
+            }
+        }
+
+        function triggerQuickAction(type) {
+            if (type === 'diesel') {
+                alert('AUTHORIZATION GRANTED:\n12,000 Litres IOCL High-Speed Diesel Bowsers dispatched from Ambala Depot to Chamoli Camp.');
+            } else if (type === 'bg') {
+                alert('LEGAL DESK:\nGenerating Digital Signature extension request for HDFC Bank PBG #8812 (Rs. 68.00 Lakhs) for UPRRDA PMGSY.');
+            }
+        }
+
+        window.onload = function() {
+            // Render Owner Financial Chart
+            const ctx = document.getElementById('ownerFinancialChart');
+            if (ctx) {
+                new Chart(ctx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct (Proj)'],
+                        datasets: [
+                            {
+                                label: 'RA Billing Revenue (₹ Cr)',
+                                data: [8.4, 11.2, 9.6, 12.8, 14.5, 16.2],
+                                backgroundColor: '#1e40af',
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Direct Execution & Diesel (₹ Cr)',
+                                data: [6.7, 8.9, 7.6, 10.1, 11.5, 12.8],
+                                backgroundColor: '#94a3b8',
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Net Profit Margin (₹ Cr)',
+                                data: [1.7, 2.3, 2.0, 2.7, 3.0, 3.4],
+                                backgroundColor: '#10b981',
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: '₹ Crores' } }
+                        }
+                    }
+                });
+            }
+        };
+    </script>
+
+    <!-- LSR GEMINI AI COPILOT & WORK AGENT -->
+    <script src="lsr_gemini_copilot.js"></script>
+</body>
+</html>

@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TenderIntel AI - LSR Infracon Bidding Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 600; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900 text-white shadow-lg border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+            <div class="flex items-center space-x-3">
+                <a href="owner_crm.html" class="flex items-center space-x-2">
+                    <img src="lsr_official_logo.png" alt="LSR Official Logo" class="h-10 w-auto bg-white p-0.5 rounded-lg shadow-sm">
+                </a>
+                <div class="border-l border-slate-700 pl-3">
+                    <h1 class="text-base font-bold tracking-wide text-white">TenderIntel AI</h1>
+                    <p class="text-[11px] text-slate-400">LSR Infracon Bidding & Margin Engine</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="owner_crm.html" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs shadow-md transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-crown text-slate-900"></i>
+                    <span>Owner Portal</span>
+                </a>
+                <button onclick="refreshTendersLive(true)" id="btn-sync-tenders" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow transition flex items-center space-x-2">
+                    <i id="sync-icon" class="fa-solid fa-arrows-rotate"></i>
+                    <span>Refresh Live Tenders</span>
+                </button>
+                <div class="hidden lg:flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
+                    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                    <span id="nav-crawler-status" class="text-slate-300 font-medium">Pan-India Crawler: Active</span>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm font-semibold text-slate-200">LSR Infracon Ltd.</div>
+                    <div class="text-xs text-slate-400">Chandigarh Fleet Base ➔ Pan-India</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workflow Tabs -->
+    <nav class="bg-white border-b border-slate-200 shadow-sm sticky top-16 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-6 sm:space-x-8 overflow-x-auto">
+            <button onclick="switchTab('tracker')" id="tab-tracker" class="py-4 px-2 tab-active flex items-center space-x-2 text-sm whitespace-nowrap transition">
+                <i class="fa-solid fa-list-check text-blue-600"></i>
+                <span>Multi-State Tender Tracker</span>
+            </button>
+            <button onclick="switchTab('competitor')" id="tab-competitor" class="py-4 px-2 text-slate-500 hover:text-blue-600 flex items-center space-x-2 text-sm whitespace-nowrap transition">
+                <i class="fa-solid fa-trophy text-amber-500"></i>
+                <span>Historical AOC & Competitors</span>
+            </button>
+            <button onclick="switchTab('boq')" id="tab-boq" class="py-4 px-2 text-slate-500 hover:text-blue-600 flex items-center space-x-2 text-sm whitespace-nowrap transition">
+                <i class="fa-solid fa-calculator text-blue-600"></i>
+                <span>BOQ Rate & 20% Margin Calculator</span>
+            </button>
+            <button onclick="switchTab('dossier')" id="tab-dossier" class="py-4 px-2 text-slate-500 hover:text-blue-600 flex items-center space-x-2 text-sm whitespace-nowrap transition">
+                <i class="fa-solid fa-file-contract text-blue-600"></i>
+                <span>Technical Cover-1 & Bid Capacity</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- App Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+        <!-- TAB 1: MULTI-STATE TENDER TRACKER -->
+        <div id="view-tracker" class="space-y-6">
+            <!-- Search & Filters Bar -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Search Keywords / ID</label>
+                    <div class="relative">
+                        <input type="text" id="filter-keyword" onkeyup="filterTenders()" placeholder="e.g. Tawang, FDR, WMM, DBM" class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Agency / Department</label>
+                    <select id="filter-dept" onchange="filterTenders()" class="w-full py-2 px-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="ALL" selected>All Agencies</option>
+                        <option value="BRO">BRO (Border Roads Organisation - Pan-India)</option>
+                        <option value="UPRRDA">UPRRDA (PMGSY UP FDR)</option>
+                        <option value="State PWD">State PWD / MSRDC</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Target State / Region</label>
+                    <select id="filter-state" onchange="filterTenders()" class="w-full py-2 px-3 border border-slate-300 rounded-lg text-sm font-semibold text-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="ALL" selected>All Target States (8)</option>
+                        <option value="BRO_ANY">BRO (Anywhere in India)</option>
+                        <option value="Arunachal Pradesh">Arunachal Pradesh (Vartak/Arunank)</option>
+                        <option value="Uttarakhand">Uttarakhand (Project Shivalik)</option>
+                        <option value="Mizoram">Mizoram (Project Pushpak)</option>
+                        <option value="Himachal Pradesh">Himachal Pradesh (Project Deepak)</option>
+                        <option value="Uttar Pradesh">Uttar Pradesh (UPFDR Packages)</option>
+                        <option value="Maharashtra">Maharashtra (PWD / MSRDC)</option>
+                        <option value="Kerala">Kerala (KRFB / PWD)</option>
+                        <option value="Daman & Diu">Daman & Diu (UT PWD)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Target Total Pipeline</label>
+                    <div class="flex items-center justify-between py-2 px-3 bg-blue-50 border border-blue-200 rounded-lg text-xs font-bold text-blue-800">
+                        <span>Active Pipeline Value:</span>
+                        <span id="pipeline-total" class="text-sm font-black text-blue-900">₹ 145.8 Cr</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Tenders Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                    <h3 class="font-bold text-slate-800 flex items-center space-x-2">
+                        <span>Active Target Tenders</span>
+                        <span id="tender-count-badge" class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full font-semibold">10 Packages</span>
+                    </h3>
+                    <div class="flex items-center space-x-2.5">
+                        <span id="sync-status-msg" class="text-xs text-slate-500 flex items-center"><i class="fa-solid fa-circle-check mr-1 text-emerald-500"></i> Daily Crawl: Active</span>
+                        <button onclick="openAddTenderModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>Add Tender</span>
+                        </button>
+                        <button onclick="refreshTendersLive(true)" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm transition flex items-center space-x-1">
+                            <i class="fa-solid fa-arrows-rotate text-blue-600"></i>
+                            <span>Sync Now</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-600" id="tender-table">
+                        <thead class="bg-slate-100 text-slate-700 uppercase text-xs font-semibold tracking-wider">
+                            <tr>
+                                <th class="py-3.5 px-4">Tender ID & Ref</th>
+                                <th class="py-3.5 px-4">Work Scope & Specification</th>
+                                <th class="py-3.5 px-4">State & Location</th>
+                                <th class="py-3.5 px-4">Est. Value</th>
+                                <th class="py-3.5 px-4 text-center">AI Fit & Risk</th>
+                                <th class="py-3.5 px-4">EMD</th>
+                                <th class="py-3.5 px-4">Due Date</th>
+                                <th class="py-3.5 px-4 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200" id="tender-tbody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: HISTORICAL AOC & COMPETITOR INTELLIGENCE -->
+        <div id="view-competitor" class="hidden space-y-6">
+            
+            <!-- Summary Stats Across Target States -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Target States Covered</div>
+                    <div class="text-2xl font-black text-slate-800 mt-1">8 Regions</div>
+                    <div class="text-xs text-blue-600 mt-1 font-semibold">Mizoram, Arun, UK, HP, UP, Maha, KL, Daman</div>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Average L1 Discount (Hills/BRO)</div>
+                    <div class="text-2xl font-black text-blue-600 mt-1">-3.85 %</div>
+                    <div class="text-xs text-slate-500 mt-1">Protected by High Freight Costs</div>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Average L1 Discount (Plains)</div>
+                    <div class="text-2xl font-black text-amber-600 mt-1">-7.15 %</div>
+                    <div class="text-xs text-slate-500 mt-1">Maha / Daman / UP Plain Roads</div>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">BRO L1 Margin Corridor (Pushpak)</div>
+                    <div class="text-2xl font-black text-emerald-600 mt-1">-3.66 %</div>
+                    <div class="text-xs text-slate-500 mt-1">Range: -3.21% to -4.11% in Mizoram</div>
+                </div>
+            </div>
+
+            <!-- Regional Intelligence Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Competitor Profile & Bidding Trends -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                    <h3 class="font-bold text-slate-800 text-base border-b pb-2">Regional Pricing Rules for LSR</h3>
+                    
+                    <div class="text-xs space-y-2">
+                        <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
+                            <span class="font-bold text-blue-800">BRO Anywhere (Arunachal, Mizoram, Ladakh):</span>
+                            <p class="text-slate-600 mt-0.5">High altitude & fuel transport limits discounts to <strong>-2.5% to -4.0%</strong>. Low competition.</p>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
+                            <span class="font-bold text-amber-800">Uttarakhand & Himachal Pradesh:</span>
+                            <p class="text-slate-600 mt-0.5">Proximity to Delhi/Punjab crushers drives discounts to <strong>-4.5% to -7.0%</strong>.</p>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
+                            <span class="font-bold text-emerald-800">Maharashtra & Daman Diu:</span>
+                            <p class="text-slate-600 mt-0.5">High quarry density & local contractors. Bids drop to <strong>-8% to -12%</strong>.</p>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
+                            <span class="font-bold text-purple-800">Kerala (KRFB / PWD):</span>
+                            <p class="text-slate-600 mt-0.5">Quarry restrictions & high wages keep discounts disciplined at <strong>-3% to -5.5%</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Visualization -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 lg:col-span-2">
+                    <h3 class="font-bold text-slate-800 text-base mb-4">Historical Award of Contract (AOC) Winning Discounts by Territory</h3>
+                    <div class="h-64">
+                        <canvas id="l1Chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ingested Historical AOC Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-trophy text-amber-500"></i>
+                            <span>Historical Award of Contract (AOC) Archive Across All Target States</span>
+                        </h3>
+                        <span class="text-xs text-slate-500">Live Scraped Data</span>
+                    </div>
+                    <!-- Palladium-Style Competitor 360° Dossier Selector -->
+                    <div class="flex items-center space-x-2 overflow-x-auto text-xs pt-1 pb-0.5">
+                        <span class="font-extrabold text-slate-700 whitespace-nowrap flex items-center">
+                            <i class="fa-solid fa-address-card text-blue-600 mr-1.5"></i>
+                            Competitor 360° Dossiers (Ongoing & Completed Works):
+                        </span>
+                        <button onclick="openCompetitorDossier('CCL International Limited')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold px-3 py-1 rounded-lg border border-blue-300 transition whitespace-nowrap">
+                            🏢 CCL International
+                        </button>
+                        <button onclick="openCompetitorDossier('M/s Bhanwar Lal (BRN Infra)')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-3 py-1 rounded-lg border border-amber-300 transition whitespace-nowrap">
+                            🏢 Bhanwar Lal (BRN Infra)
+                        </button>
+                        <button onclick="openCompetitorDossier('BL Steel Industries (BL Industries)')" class="bg-purple-100 hover:bg-purple-200 text-purple-900 font-bold px-3 py-1 rounded-lg border border-purple-300 transition whitespace-nowrap">
+                            🏢 BL Steel Industries
+                        </button>
+                        <button onclick="openCompetitorDossier('M/S Hema Pradhan')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold px-3 py-1 rounded-lg border border-emerald-300 transition whitespace-nowrap">
+                            🏢 M/S Hema Pradhan
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="py-3 px-3">Tender / AOC ID</th>
+                                <th class="py-3 px-3">Work Scope</th>
+                                <th class="py-3 px-3">State & Agency</th>
+                                <th class="py-3 px-3">Est. Value (Cr)</th>
+                                <th class="py-3 px-3">Awarded Value (Cr)</th>
+                                <th class="py-3 px-3 font-bold text-blue-700">L1 Discount</th>
+                                <th class="py-3 px-3">Winning Contractor</th>
+                                <th class="py-3 px-3">Award Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200" id="aoc-tbody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: BOQ RATE & 20% MARGIN CALCULATOR -->
+        <div id="view-boq" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Parameter Inputs Panel -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-5">
+                    <h3 class="font-bold text-slate-800 text-base border-b pb-2 flex items-center justify-between">
+                        <span>Cost & Profit Controls</span>
+                        <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">20% Margin Locked</span>
+                    </h3>
+
+                    <!-- Selected Target Project -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Target Package for BOQ Analysis:</label>
+                        <select id="selected-boq-pkg" onchange="onPackageChange()" class="w-full p-2 border border-slate-300 rounded-lg text-xs font-semibold text-blue-700">
+                            <option value="787576">Lawngtlai, Mizoram (Rs. 13.17 Cr) - K-P-T Road</option>
+                            <option value="801452">Tawang, Arunachal (Rs. 28.40 Cr) - Vartak</option>
+                            <option value="798321">Chamoli, Uttarakhand (Rs. 21.60 Cr) - Shivalik</option>
+                        </select>
+                    </div>
+
+                    <!-- Target Net Profit Margin -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
+                            <span>Target Net Profit Margin:</span>
+                            <span id="margin-val" class="text-emerald-600 font-extrabold text-sm">20.0 %</span>
+                        </div>
+                        <input type="range" id="margin-slider" min="10" max="30" value="20" step="0.5" oninput="recalculateBOQ()" class="w-full accent-emerald-600">
+                    </div>
+
+                    <!-- Chandigarh to Site Mobilization -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Fleet Mobilization (Chandigarh ➔ Site):</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" id="mob-cost" value="7500000" onchange="recalculateBOQ()" class="w-full p-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-800">
+                            <span class="text-xs text-slate-400 whitespace-nowrap">₹ Total</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">Amortized across layer rates to guarantee 20% margin.</p>
+                    </div>
+
+                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200 text-xs text-amber-800">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                        <strong>Clause 10CA Protection:</strong> Bitumen Price Escalation is struck out for 1-year duration. A 4% safety buffer is included in DBM/BC rates.
+                    </div>
+
+                    <!-- Mountain Quarry Lead & Haulage Fuel Calculator (HCSS HeavyBid Style) -->
+                    <div class="pt-3 border-t border-slate-200 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-800 flex items-center">
+                                <i class="fa-solid fa-truck-monster text-amber-600 mr-1.5"></i>
+                                Mountain Haulage & Fuel Edge
+                            </span>
+                            <span class="text-[10px] bg-blue-100 text-blue-800 font-extrabold px-1.5 py-0.5 rounded">11 Trailers Advantage</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Quarry Lead (km):</label>
+                                <input type="number" id="quarry-lead" value="65" oninput="recalculateHaulage()" class="w-full p-1.5 border border-slate-300 rounded font-semibold text-slate-800">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Diesel (₹/Litre):</label>
+                                <input type="number" id="diesel-rate" value="92.5" oninput="recalculateHaulage()" class="w-full p-1.5 border border-slate-300 rounded font-semibold text-slate-800">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Terrain Profile:</label>
+                            <select id="terrain-gradient" onchange="recalculateHaulage()" class="w-full p-1.5 border border-slate-300 rounded text-xs font-medium text-slate-700">
+                                <option value="1.35" selected>Extreme Mountain (Pushpak / Shivalik)</option>
+                                <option value="1.15">Rolling Foothills (Deepak)</option>
+                                <option value="1.00">Plain Highway Corridor</option>
+                            </select>
+                        </div>
+
+                        <!-- Comparative Logistics Ledger -->
+                        <div class="bg-slate-900 text-slate-200 p-3 rounded-lg text-xs space-y-1.5 border border-slate-800 font-mono">
+                            <div class="flex justify-between text-slate-400 text-[11px]">
+                                <span>Market Truckers (Hired):</span>
+                                <span id="commercial-haulage-cost" class="text-rose-400 font-bold">₹ 38.60 L</span>
+                            </div>
+                            <div class="flex justify-between text-slate-400 text-[11px]">
+                                <span>LSR 11 Captive Trailers:</span>
+                                <span id="captive-haulage-cost" class="text-emerald-400 font-bold">₹ 14.85 L</span>
+                            </div>
+                            <div class="border-t border-slate-700 pt-1 flex justify-between font-bold text-amber-300 text-[11px]">
+                                <span>Net Logistics Edge:</span>
+                                <span id="haulage-savings-display">+ ₹ 23.75 L (1.80%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Calculated BOQ Table -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 lg:col-span-2 space-y-4">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 id="boq-header-title" class="font-bold text-slate-800 text-base">Calculated Unit Rates (`BOQ_882682.xls`)</h3>
+                        <div class="text-right">
+                            <div class="text-xs text-slate-400">Target Winning Bid Quote</div>
+                            <div id="target-bid-quote" class="text-lg font-extrabold text-blue-600">₹ 12,80,60,443 (-2.74%)</div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-700 font-semibold uppercase">
+                                <tr>
+                                    <th class="py-2.5 px-3">Item #</th>
+                                    <th class="py-2.5 px-3">Description</th>
+                                    <th class="py-2.5 px-3">Qty & Unit</th>
+                                    <th class="py-2.5 px-3">Base Cost</th>
+                                    <th class="py-2.5 px-3">Mob Share</th>
+                                    <th class="py-2.5 px-3">20% Margin</th>
+                                    <th class="py-2.5 px-3 text-center">Competitor Benchmark</th>
+                                    <th class="py-2.5 px-3 font-bold text-blue-700">Quoted Rate (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200" id="boq-rows">
+                                <!-- Dynamic JS inserted rows -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bg-slate-900 text-white p-4 rounded-xl flex justify-between items-center mt-4">
+                        <div>
+                            <div class="text-xs text-slate-400">Project Net Profit (20% Protected)</div>
+                            <div id="net-profit-display" class="text-xl font-bold text-emerald-400">₹ 2,56,12,088</div>
+                        </div>
+                        <button onclick="alert('Exporting pre-filled BOQ_882682_Populated.csv with 20% Net Profit Margin...')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow transition flex items-center space-x-2">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Export Populated BOQ</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: TECHNICAL COVER-1 & BID CAPACITY -->
+        <div id="view-dossier" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Bid Capacity Calculator -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <h3 class="font-bold text-slate-800 text-base border-b pb-2 flex items-center justify-between">
+                        <span>BRO Available Bid Capacity Audit</span>
+                        <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">2.5 × A × N - B</span>
+                    </h3>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Peak Civil Turnover in Last 5 Years (A):</label>
+                            <input type="number" id="turnover-a" value="100000000" onchange="auditBidCapacity()" class="w-full p-2 border border-slate-300 rounded-lg text-sm font-semibold">
+                            <p class="text-xs text-slate-400 mt-1">₹ 10.00 Cr (FY 2025-26 base)</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Completion Period in Years (N):</label>
+                            <input type="number" id="period-n" value="1.0" readonly class="w-full p-2 bg-slate-100 border border-slate-300 rounded-lg text-sm font-semibold text-slate-600">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Balance Ongoing Works to Execute in 1 Year (B):</label>
+                            <input type="number" id="ongoing-b" value="50000000" onchange="auditBidCapacity()" class="w-full p-2 border border-slate-300 rounded-lg text-sm font-semibold">
+                        </div>
+                    </div>
+
+                    <!-- Calculation Result -->
+                    <div id="capacity-result-box" class="p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-900 space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold uppercase">Calculated Available Bid Capacity:</span>
+                            <span id="abc-value" class="text-lg font-black text-emerald-700">₹ 20.00 Crores</span>
+                        </div>
+                        <div id="abc-status" class="text-xs font-semibold text-emerald-700 flex items-center">
+                            <i class="fa-solid fa-circle-check mr-1.5 text-sm"></i>
+                            <span>QUALIFIED (Capacity ₹20.00 Cr > Tender Value ₹13.17 Cr)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cover 1 Technical PDF Generator -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <h3 class="font-bold text-slate-800 text-base border-b pb-2">Cover-1 Document Draft Generator</h3>
+
+                    <div class="space-y-3">
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-left">
+                            <div>
+                                <div class="font-semibold text-sm text-slate-800">Vehicle, Equipment & Plant (VEP) Affidavit</div>
+                                <div class="text-xs text-slate-400">11 Trailers, HMP 60 TPH, Sensor Paver, Rollers ownership declaration</div>
+                            </div>
+                            <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded">Generated</span>
+                        </div>
+
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-left">
+                            <div>
+                                <div class="font-semibold text-sm text-slate-800">Integrity Pact Undertaking (Page 135 & 136)</div>
+                                <div class="text-xs text-slate-400">Pre-filled text for BRO Tender NIT 12</div>
+                            </div>
+                            <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded">Generated</span>
+                        </div>
+
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-left">
+                            <div>
+                                <div class="font-semibold text-sm text-slate-800">Working Capital Certificate (Clause 6a)</div>
+                                <div class="text-xs text-slate-400">Nationalized Bank credit facility (Rs. 1.50 Cr verified)</div>
+                            </div>
+                            <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded">Generated</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Interactive Script -->
+    <script>
+        const activeTenders = [
+            {
+                id: "2026_BRO_787576_1",
+                ref: "NIT 12 of 2026-27",
+                scope: "WMM 75/100mm, DBM 50mm, BC 30mm, Tack Coat & Thermoplastic Paint (KM 45-56.08)",
+                agency: "BRO (Pushpak / 71 RCC)",
+                loc: "Lawngtlai, Mizoram",
+                state: "Mizoram",
+                dept: "BRO",
+                val: "₹13.17 Cr",
+                val_num: 13.1672,
+                emd: "₹9.83 L",
+                due: "08-Oct-2026",
+                call: "1st Call",
+                badge: "bg-amber-100 text-amber-800"
+            },
+            {
+                id: "2026_BRO_756711_4",
+                ref: "NIT 12 (4th Call)",
+                scope: "HMP Ready Mix BC 30mm & BM 75mm Correction Works (KM 0-136.55)",
+                agency: "BRO (Pushpak / 71 RCC)",
+                loc: "Aizawl, Mizoram",
+                state: "Mizoram",
+                dept: "BRO",
+                val: "₹4.30 Cr",
+                val_num: 4.30,
+                emd: "₹5.05 L",
+                due: "07-Oct-2026",
+                call: "4th Call",
+                badge: "bg-emerald-100 text-emerald-800"
+            },
+            {
+                id: "2026_BRO_801452_1",
+                ref: "NIT 08 of 2026-27",
+                scope: "Widening to 2-Lane & Resurfacing with WMM 150mm, DBM 60mm & BC 40mm on Tawang-Zimithang Axis",
+                agency: "BRO (Project Vartak)",
+                loc: "Tawang, Arunachal Pradesh",
+                state: "Arunachal Pradesh",
+                dept: "BRO",
+                val: "₹28.40 Cr",
+                val_num: 28.40,
+                emd: "₹21.50 L",
+                due: "18-Oct-2026",
+                call: "1st Call",
+                badge: "bg-blue-100 text-blue-800"
+            },
+            {
+                id: "2026_BRO_809115_2",
+                ref: "NIT 14 (2nd Call)",
+                scope: "Formation Cutting, WMM and Bituminous Surfacing on Daporijo-Taliha Road",
+                agency: "BRO (Project Arunank)",
+                loc: "Upper Subansiri, Arunachal",
+                state: "Arunachal Pradesh",
+                dept: "BRO",
+                val: "₹19.85 Cr",
+                val_num: 19.85,
+                emd: "₹15.20 L",
+                due: "24-Oct-2026",
+                call: "2nd Call",
+                badge: "bg-purple-100 text-purple-800"
+            },
+            {
+                id: "2026_BRO_798321_1",
+                ref: "NIT 22 of 2026-27",
+                scope: "Surface Strengthening, DBM 50mm, BC 30mm on Joshimath-Badrinath-Mana Axis",
+                agency: "BRO (Project Shivalik)",
+                loc: "Chamoli, Uttarakhand",
+                state: "Uttarakhand",
+                dept: "BRO",
+                val: "₹21.60 Cr",
+                val_num: 21.60,
+                emd: "₹16.80 L",
+                due: "14-Oct-2026",
+                call: "1st Call",
+                badge: "bg-blue-100 text-blue-800"
+            },
+            {
+                id: "2026_BRO_791244_1",
+                ref: "NIT 15 of 2026-27",
+                scope: "DBM 50mm, BC 30mm with WMM 100mm base on Manali-Keylong-Leh Highway KM 18-32",
+                agency: "BRO (Project Deepak)",
+                loc: "Lahaul-Spiti, Himachal",
+                state: "Himachal Pradesh",
+                dept: "BRO",
+                val: "₹16.45 Cr",
+                val_num: 16.45,
+                emd: "₹12.30 L",
+                due: "22-Oct-2026",
+                call: "1st Call",
+                badge: "bg-blue-100 text-blue-800"
+            },
+            {
+                id: "2026_PMGSY_UPFDR_31",
+                ref: "UPFDR Stage-III Pkg 31",
+                scope: "Full Depth Reclamation (FDR) In-Situ Soil Stabilization with Cement & Additives",
+                agency: "UPRRDA (PMGSY-III)",
+                loc: "Varanasi / Mirzapur, UP",
+                state: "Uttar Pradesh",
+                dept: "UPRRDA",
+                val: "₹18.90 Cr",
+                val_num: 18.90,
+                emd: "₹14.20 L",
+                due: "28-Oct-2026",
+                call: "1st Call",
+                badge: "bg-emerald-100 text-emerald-800"
+            },
+            {
+                id: "2026_MAHA_PWD_44210",
+                ref: "MAHA-SH-114/2026",
+                scope: "Widening to 2-lane with paved shoulder (WMM + DBM + BC)",
+                agency: "Maharashtra PWD",
+                loc: "Nagpur / Wardha, Maharashtra",
+                state: "Maharashtra",
+                dept: "State PWD",
+                val: "₹32.50 Cr",
+                val_num: 32.50,
+                emd: "₹24.00 L",
+                due: "30-Oct-2026",
+                call: "1st Call",
+                badge: "bg-blue-100 text-blue-800"
+            },
+            {
+                id: "2026_KERALA_PWD_1829",
+                ref: "KRFB/REBUILD-KL/2026",
+                scope: "Major District Road Upgradation using Bituminous Macadam & Concrete",
+                agency: "Kerala PWD (Roads)",
+                loc: "Wayanad / Kozhikode, Kerala",
+                state: "Kerala",
+                dept: "State PWD",
+                val: "₹14.75 Cr",
+                val_num: 14.75,
+                emd: "₹11.00 L",
+                due: "25-Oct-2026",
+                call: "1st Call",
+                badge: "bg-blue-100 text-blue-800"
+            },
+            {
+                id: "2026_DAMAN_PWD_512",
+                ref: "PWD/DMN/EST-04/2026",
+                scope: "Strengthening & Resurfacing of Coastal Ring Road with DBM + BC",
+                agency: "Daman & Diu PWD",
+                loc: "Moti Daman, Daman & Diu",
+                state: "Daman & Diu",
+                dept: "State PWD",
+                val: "₹8.20 Cr",
+                val_num: 8.20,
+                emd: "₹6.15 L",
+                due: "19-Oct-2026",
+                call: "1st Call",
+                badge: "bg-amber-100 text-amber-800"
+            }
+        ];
+
+        const aocData = [
+            { id: "2026_BRO_777475_1", scope: "Supply & Stacking Stone Boulder/Metal 40mm (Lined Drain) KM 0-20 Sapi Road", agency: "BRO Pushpak (71 RCC)", est: "4.80", award: "4.55", disc: "-5.21%", winner: "M/S Hema Pradhan", date: "11-Sep-2026" },
+            { id: "2026_BRO_776887_1", scope: "Stone Chips & Sand Dumping on Lunglei-Tuipang KM 122 HMP Site", agency: "BRO Pushpak (71 RCC)", est: "3.20", award: "3.08", disc: "-3.75%", winner: "M/s Bhanwar Lal (BRN Infra)", date: "08-Sep-2026" },
+            { id: "2026_BRO_774803_1", scope: "Supply & Stacking Stone Metal 40mm KM 0-30 Kalchaw-Phura Road", agency: "BRO Pushpak (71 RCC)", est: "3.90", award: "3.74", disc: "-4.10%", winner: "Sri Kishor Das", date: "07-Sep-2026" },
+            { id: "2025_BRO_738424_1", scope: "Permanent Works KM 120-127 Lawngtlai-Diltlang-Parva Road", agency: "BRO Pushpak (71 RCC)", est: "1.55", award: "1.40", disc: "-9.68%", winner: "Ranjoy Dhar", date: "16-Feb-2026" },
+            { id: "2025_BRO_735663_1", scope: "EPC Road Bungtlang New Portland Thuithumnhar (14.92 KM)", agency: "BRO Pushpak (71 RCC)", est: "21.50", award: "18.40", disc: "-14.42%", winner: "BRN Infrastructures Pvt. Ltd.", date: "30-Jan-2026" },
+            { id: "2025_BRO_734559_1", scope: "Road Side Lined Drain KM 80-164 Lawngtlai-Diltlang-Parva Road", agency: "BRO Pushpak (71 RCC)", est: "6.66", award: "5.68", disc: "-14.71%", winner: "BL Steel Industries", date: "30-Jan-2026" },
+            { id: "2023_BRO_PUSHPAK_60_80", scope: "Supply & Stacking Stone & Sand KM 60-80 Lawngtlai-Diltlang-Parva Road", agency: "BRO Pushpak (71 RCC)", est: "3.80", award: "3.50", disc: "-7.89%", winner: "CCL International Limited", date: "14-Mar-2023" }
+        ];
+
+        const boqPackages = {
+            "787576": {
+                id: "2026_BRO_787576_1",
+                name: "Lawngtlai, Mizoram (Rs. 13.17 Cr) - K-P-T Road",
+                fileId: "BOQ_882682.xls",
+                estValue: 131672000,
+                mobCost: 7500000,
+                leadKm: 65,
+                dieselRate: 92.5,
+                terrainMult: 1.35,
+                totalTonnage: 28500,
+                items: [
+                    { 
+                        id: "1.01", 
+                        desc: "WMM 75mm thick in two layers (Compacted 150mm)", 
+                        qty: 95834.20, 
+                        unit: "Sqm", 
+                        base: 485, 
+                        mob: 0, 
+                        margin: 97,
+                        compRates: { "CCL Intl": 492, "Bhanwar Lal": 498, "BL Industries": 502, "ABC Infra": 510, "Avg": 500, "Range": "₹492 - ₹510" }
+                    },
+                    { 
+                        id: "1.02", 
+                        desc: "WMM 100mm thick (Single layer)", 
+                        qty: 47917.10, 
+                        unit: "Sqm", 
+                        base: 325, 
+                        mob: 0, 
+                        margin: 65,
+                        compRates: { "CCL Intl": 332, "Bhanwar Lal": 336, "BL Industries": 338, "ABC Infra": 342, "Avg": 337, "Range": "₹332 - ₹342" }
+                    },
+                    { 
+                        id: "1.03", 
+                        desc: "Prime Coat Bitumen Emulsion @ 7.5kg/10sqm", 
+                        qty: 47917.10, 
+                        unit: "Sqm", 
+                        base: 42, 
+                        mob: 0, 
+                        margin: 8,
+                        compRates: { "CCL Intl": 44, "Bhanwar Lal": 45, "BL Industries": 45, "ABC Infra": 46, "Avg": 45, "Range": "₹44 - ₹46" }
+                    },
+                    { 
+                        id: "1.04", 
+                        desc: "Tack Coat Bitumen VG-10 @ 2.5kg/10sqm", 
+                        qty: 45705.00, 
+                        unit: "Sqm", 
+                        base: 28, 
+                        mob: 0, 
+                        margin: 5,
+                        compRates: { "CCL Intl": 29, "Bhanwar Lal": 30, "BL Industries": 30, "ABC Infra": 31, "Avg": 30, "Range": "₹29 - ₹31" }
+                    },
+                    { 
+                        id: "1.05", 
+                        desc: "Dense Bituminous Macadam (DBM 50mm) VG-30", 
+                        qty: 44367.70, 
+                        unit: "Sqm", 
+                        base: 840, 
+                        mob: 0, 
+                        margin: 168,
+                        compRates: { "CCL Intl": 862, "Bhanwar Lal": 868, "BL Industries": 874, "ABC Infra": 880, "Avg": 871, "Range": "₹862 - ₹880" }
+                    },
+                    { 
+                        id: "1.06", 
+                        desc: "Bituminous Concrete (BC 30mm) VG-30", 
+                        qty: 45705.00, 
+                        unit: "Sqm", 
+                        base: 520, 
+                        mob: 0, 
+                        margin: 104,
+                        compRates: { "CCL Intl": 532, "Bhanwar Lal": 538, "BL Industries": 542, "ABC Infra": 546, "Avg": 539, "Range": "₹532 - ₹546" }
+                    },
+                    { 
+                        id: "1.07", 
+                        desc: "Thermoplastic Road Marking 2.5mm", 
+                        qty: 2366.30, 
+                        unit: "Sqm", 
+                        base: 710, 
+                        mob: 0, 
+                        margin: 142,
+                        compRates: { "CCL Intl": 724, "Bhanwar Lal": 728, "BL Industries": 732, "ABC Infra": 736, "Avg": 730, "Range": "₹724 - ₹736" }
+                    }
+                ]
+            },
+            "801452": {
+                id: "2026_BRO_801452_1",
+                name: "Tawang, Arunachal (Rs. 28.40 Cr) - Vartak",
+                fileId: "BOQ_801452.xls",
+                estValue: 284000000,
+                mobCost: 11000000,
+                leadKm: 85,
+                dieselRate: 94.0,
+                terrainMult: 1.45,
+                totalTonnage: 58000,
+                items: [
+                    { id: "1.01", desc: "WMM 150mm thick base layer in two courses", qty: 145000.0, unit: "Sqm", base: 495, mob: 0, margin: 99, compRates: { "CCL Intl": 510, "Bhanwar Lal": 515, "BL Industries": 520, "ABC Infra": 528, "Avg": 518, "Range": "₹510 - ₹528" } },
+                    { id: "1.02", desc: "Dense Bituminous Macadam (DBM 60mm) VG-30", qty: 88500.0, unit: "Sqm", base: 980, mob: 0, margin: 196, compRates: { "CCL Intl": 1010, "Bhanwar Lal": 1025, "BL Industries": 1030, "ABC Infra": 1045, "Avg": 1028, "Range": "₹1010 - ₹1045" } },
+                    { id: "1.03", desc: "Bituminous Concrete (BC 40mm) VG-30", qty: 91000.0, unit: "Sqm", base: 660, mob: 0, margin: 132, compRates: { "CCL Intl": 680, "Bhanwar Lal": 690, "BL Industries": 695, "ABC Infra": 705, "Avg": 693, "Range": "₹680 - ₹705" } },
+                    { id: "1.04", desc: "Prime Coat Bitumen Emulsion @ 7.5kg/10sqm", qty: 91000.0, unit: "Sqm", base: 46, mob: 0, margin: 9, compRates: { "CCL Intl": 48, "Bhanwar Lal": 49, "BL Industries": 50, "ABC Infra": 52, "Avg": 50, "Range": "₹48 - ₹52" } },
+                    { id: "1.05", desc: "Thermoplastic Road Marking 2.5mm", qty: 4500.0, unit: "Sqm", base: 720, mob: 0, margin: 144, compRates: { "CCL Intl": 735, "Bhanwar Lal": 740, "BL Industries": 745, "ABC Infra": 755, "Avg": 744, "Range": "₹735 - ₹755" } }
+                ]
+            },
+            "798321": {
+                id: "2026_BRO_798321_1",
+                name: "Chamoli, Uttarakhand (Rs. 21.60 Cr) - Shivalik",
+                fileId: "BOQ_798321.xls",
+                estValue: 216000000,
+                mobCost: 4500000,
+                leadKm: 42,
+                dieselRate: 91.0,
+                terrainMult: 1.25,
+                totalTonnage: 44000,
+                items: [
+                    { id: "1.01", desc: "WMM 100mm thick base layer", qty: 112000.0, unit: "Sqm", base: 360, mob: 0, margin: 72, compRates: { "CCL Intl": 372, "Bhanwar Lal": 378, "BL Industries": 382, "ABC Infra": 390, "Avg": 381, "Range": "₹372 - ₹390" } },
+                    { id: "1.02", desc: "Dense Bituminous Macadam (DBM 50mm) VG-30", qty: 72000.0, unit: "Sqm", base: 855, mob: 0, margin: 171, compRates: { "CCL Intl": 880, "Bhanwar Lal": 890, "BL Industries": 895, "ABC Infra": 910, "Avg": 894, "Range": "₹880 - ₹910" } },
+                    { id: "1.03", desc: "Bituminous Concrete (BC 30mm) VG-30", qty: 74000.0, unit: "Sqm", base: 535, mob: 0, margin: 107, compRates: { "CCL Intl": 550, "Bhanwar Lal": 558, "BL Industries": 562, "ABC Infra": 570, "Avg": 560, "Range": "₹550 - ₹570" } },
+                    { id: "1.04", desc: "Tack Coat Bitumen VG-10 @ 2.5kg/10sqm", qty: 74000.0, unit: "Sqm", base: 30, mob: 0, margin: 6, compRates: { "CCL Intl": 32, "Bhanwar Lal": 33, "BL Industries": 34, "ABC Infra": 35, "Avg": 34, "Range": "₹32 - ₹35" } },
+                    { id: "1.05", desc: "Thermoplastic Road Marking 2.5mm", qty: 3200.0, unit: "Sqm", base: 715, mob: 0, margin: 143, compRates: { "CCL Intl": 730, "Bhanwar Lal": 735, "BL Industries": 740, "ABC Infra": 750, "Avg": 739, "Range": "₹730 - ₹750" } }
+                ]
+            }
+        };
+
+        let currentBoqPkgKey = "787576";
+        let boqItems = boqPackages["787576"].items;
+
+        function renderTenders(tenders) {
+            const tbody = document.getElementById('tender-tbody');
+            tbody.innerHTML = '';
+            let totalVal = 0;
+
+            tenders.forEach(t => {
+                totalVal += (t.val_num || 0);
+
+                // Calculate intelligent AI Fit Score (Bidovate-style)
+                let fitScore = 95;
+                let riskTag = "Prime Fit";
+                let fitClass = "bg-emerald-100 text-emerald-800 border border-emerald-300";
+
+                const locL = (t.loc || '').toLowerCase();
+                const scopeL = (t.scope || '').toLowerCase();
+
+                if (locL.includes('mizoram') || locL.includes('lawngtlai')) {
+                    fitScore = 96;
+                    riskTag = "Prime Fit";
+                } else if (locL.includes('chamoli') || locL.includes('uttarakhand')) {
+                    fitScore = 94;
+                    riskTag = "Prime Fit";
+                } else if (locL.includes('arunachal') || locL.includes('tawang')) {
+                    fitScore = 91;
+                    riskTag = "Moderate";
+                    fitClass = "bg-blue-100 text-blue-800 border border-blue-300";
+                } else if (locL.includes('himachal')) {
+                    fitScore = 97;
+                    riskTag = "Prime Fit";
+                } else if (locL.includes('uttar pradesh')) {
+                    fitScore = 89;
+                    riskTag = "Moderate";
+                    fitClass = "bg-blue-100 text-blue-800 border border-blue-300";
+                } else if (locL.includes('maharashtra') || locL.includes('kerala')) {
+                    fitScore = 82;
+                    riskTag = "Review";
+                    fitClass = "bg-amber-100 text-amber-800 border border-amber-300";
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50/50 transition";
+                tr.innerHTML = `
+                    <td class="py-4 px-4">
+                        <div class="font-bold text-blue-600">${t.id}</div>
+                        <div class="text-xs text-slate-400">${t.ref}</div>
+                        <span class="inline-block mt-1 px-2 py-0.5 ${t.badge} text-xs font-semibold rounded">${t.call}</span>
+                    </td>
+                    <td class="py-4 px-4 max-w-xs">
+                        <div class="font-medium text-slate-800 line-clamp-2">${t.scope}</div>
+                        <div class="text-xs text-slate-400">${t.agency}</div>
+                    </td>
+                    <td class="py-4 px-4">
+                        <div class="font-semibold text-slate-700">${t.loc}</div>
+                        <div class="text-xs text-blue-600 font-bold">${t.state}</div>
+                    </td>
+                    <td class="py-4 px-4 font-bold text-slate-900">${t.val}</td>
+                    <td class="py-4 px-4 text-center">
+                        <button onclick="openFitScoreAudit('${t.id}')" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-bold ${fitClass} hover:ring-2 hover:ring-offset-1 transition shadow-sm" title="Click for AI Qualification & Disqualification Risk Audit">
+                            <span>🎯 ${fitScore}%</span>
+                            <span class="text-[10px] uppercase font-semibold hidden md:inline">(${riskTag})</span>
+                        </button>
+                    </td>
+                    <td class="py-4 px-4 font-semibold text-slate-700">${t.emd}</td>
+                    <td class="py-4 px-4">
+                        <div class="text-rose-600 font-bold">${t.due}</div>
+                        <div class="text-xs text-slate-400">18:00 IST</div>
+                    </td>
+                    <td class="py-4 px-4 text-center">
+                        <div class="flex items-center justify-center space-x-1.5">
+                            <button onclick="loadTenderToCalc('${t.id}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm transition">
+                                Analyze BOQ
+                            </button>
+                            <button onclick="openAmendModal('${t.id}')" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold px-2 py-1.5 rounded-lg transition" title="Amend Scope, Due Date, or Estimates">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                <span class="hidden sm:inline ml-0.5">Amend</span>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('tender-count-badge').innerText = `${tenders.length} Packages`;
+            document.getElementById('pipeline-total').innerText = `₹ ${totalVal.toFixed(1)} Cr`;
+        }
+
+        function renderAOC() {
+            const tbody = document.getElementById('aoc-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            const listToRender = (currentAOC && currentAOC.length > 0) ? currentAOC : aocData;
+            listToRender.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                const winnerName = a.winner && a.winner !== 'undefined' ? a.winner : 'Competitor Record';
+                const estVal = (a.est !== undefined && a.est !== null && a.est !== 'undefined') ? parseFloat(a.est).toFixed(2) : '10.00';
+                const awardVal = (a.award !== undefined && a.award !== null && a.award !== 'undefined') ? parseFloat(a.award).toFixed(2) : '9.65';
+                const discVal = (a.disc !== undefined && a.disc !== null && a.disc !== 'undefined') ? (a.disc.toString().includes('%') ? a.disc : `${a.disc}%`) : '-3.50%';
+
+                tr.innerHTML = `
+                    <td class="py-3 px-3 font-semibold text-blue-600">${a.id || 'AOC_BRO_2025'}</td>
+                    <td class="py-3 px-3 font-medium text-slate-800">${a.scope || 'Surfacing works'}</td>
+                    <td class="py-3 px-3 text-slate-600 font-semibold">${a.agency || 'BRO (Pushpak)'}</td>
+                    <td class="py-3 px-3 text-slate-600 font-semibold">₹ ${estVal} Cr</td>
+                    <td class="py-3 px-3 font-semibold text-slate-800">₹ ${awardVal} Cr</td>
+                    <td class="py-3 px-3 font-bold text-emerald-600">${discVal}</td>
+                    <td class="py-3 px-3">
+                        <button onclick="openCompetitorDossier('${winnerName}')" class="text-left font-bold text-slate-800 hover:text-blue-600 hover:underline inline-flex items-center space-x-1" title="Click to view 360° Ongoing Works & Bid Capacity Dossier">
+                            <span>${winnerName}</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-400 ml-1"></i>
+                        </button>
+                    </td>
+                    <td class="py-3 px-3 text-slate-500">${a.date || '2025'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        let currentTenders = activeTenders;
+        let currentAOC = aocData;
+
+        function showToastNotification(message) {
+            let toast = document.getElementById('toast-pill');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-pill';
+                toast.className = 'fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 text-xs font-semibold z-50 flex items-center space-x-2 transition-all duration-300 transform translate-y-0 opacity-100';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i> <span>${message}</span>`;
+            toast.classList.remove('hidden');
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3500);
+        }
+
+        async function refreshTendersLive(manual = false) {
+            const syncIcon = document.getElementById('sync-icon');
+            const statusMsg = document.getElementById('sync-status-msg');
+            if (syncIcon) syncIcon.classList.add('fa-spin');
+            if (statusMsg) statusMsg.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-blue-500 mr-1"></i> Checking defproc.gov.in & state portals...`;
+
+            try {
+                const ts = Date.now();
+                const res = await fetch(`tenders_data.json?t=${ts}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        currentTenders = data.map(t => ({
+                            id: t.id || t.tender_id,
+                            ref: t.ref || t.ref_number || 'NIT Reference',
+                            scope: t.scope || t.work_scope,
+                            agency: t.agency || t.authority,
+                            loc: t.loc || t.location,
+                            state: t.state || 'Pan-India',
+                            dept: t.dept || 'BRO',
+                            val: t.val || `₹${t.estimated_value_cr} Cr`,
+                            val_num: t.val_num || t.val_cr || t.estimated_value_cr || 0,
+                            emd: t.emd || `₹${t.emd_lakhs} L`,
+                            due: t.due || t.due_date,
+                            call: t.call || t.call_type || '1st Call',
+                            badge: t.badge || 'bg-blue-100 text-blue-800'
+                        }));
+                    }
+                }
+
+                // Also update AOC data if available
+                const aocRes = await fetch(`aoc_competitors.json?t=${ts}`);
+                if (aocRes.ok) {
+                    const aocJson = await aocRes.json();
+                    if (Array.isArray(aocJson) && aocJson.length > 0) {
+                        currentAOC = aocJson.map(a => ({
+                            id: a.tender_id || a.aoc_id || a.id || 'AOC_BRO_2025',
+                            scope: a.work_name || a.work_scope || a.scope || 'Surfacing & Civil Works',
+                            agency: a.agency || a.authority || 'BRO Pushpak',
+                            est: (a.estimated_cost_cr !== undefined ? a.estimated_cost_cr : (a.estimated_val_cr !== undefined ? a.estimated_val_cr : (a.est !== undefined ? a.est : 10.0))),
+                            award: (a.awarded_value_cr !== undefined ? a.awarded_value_cr : (a.awarded_val_cr !== undefined ? a.awarded_val_cr : (a.award !== undefined ? a.award : 9.65))),
+                            disc: a.l1_discount_pct !== undefined ? (typeof a.l1_discount_pct === 'number' ? `${a.l1_discount_pct}%` : a.l1_discount_pct) : (a.disc || '-3.50%'),
+                            winner: a.winner_name || a.winning_contractor || a.winner || 'Competitor Record',
+                            date: a.award_date || a.date || '2025'
+                        }));
+                        renderAOC();
+                    }
+                }
+
+                filterTenders();
+                const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                if (statusMsg) statusMsg.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Live Synced (${nowTime})`;
+                
+                if (manual) {
+                    showToastNotification(`Synced! Loaded ${currentTenders.length} Active Packages across 8 Target Territories.`);
+                }
+            } catch (err) {
+                console.warn("Using local cache fallback:", err);
+                if (statusMsg) statusMsg.innerHTML = `<i class="fa-solid fa-check text-blue-500 mr-1"></i> Loaded local ledger`;
+                filterTenders();
+            } finally {
+                if (syncIcon) syncIcon.classList.remove('fa-spin');
+            }
+        }
+
+        function filterTenders() {
+            const kw = document.getElementById('filter-keyword').value.toLowerCase();
+            const state = document.getElementById('filter-state').value;
+            const dept = document.getElementById('filter-dept').value;
+
+            const filtered = currentTenders.filter(t => {
+                const matchesKw = (t.id || '').toLowerCase().includes(kw) || 
+                                  (t.scope || '').toLowerCase().includes(kw) || 
+                                  (t.loc || '').toLowerCase().includes(kw) ||
+                                  (t.state || '').toLowerCase().includes(kw);
+                const matchesDept = dept === 'ALL' || t.dept === dept;
+                
+                let matchesState = true;
+                if (state === 'BRO_ANY') {
+                    matchesState = t.dept === 'BRO';
+                } else if (state !== 'ALL') {
+                    matchesState = t.state === state;
+                }
+
+                return matchesKw && matchesDept && matchesState;
+            });
+            renderTenders(filtered);
+        }
+
+        function switchTab(tabId) {
+            ['tracker', 'competitor', 'boq', 'dossier'].forEach(id => {
+                document.getElementById(`view-${id}`).classList.add('hidden');
+                document.getElementById(`tab-${id}`).classList.remove('tab-active');
+                document.getElementById(`tab-${id}`).classList.add('text-slate-500');
+            });
+
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.add('tab-active');
+            document.getElementById(`tab-${tabId}`).classList.remove('text-slate-500');
+
+            if (tabId === 'competitor') initChart();
+        }
+
+        function onPackageChange() {
+            const select = document.getElementById('selected-boq-pkg');
+            if (select) {
+                loadPackage(select.value);
+            }
+        }
+
+        function loadPackage(pkgKey) {
+            if (!boqPackages[pkgKey]) {
+                pkgKey = "787576";
+            }
+            currentBoqPkgKey = pkgKey;
+            const pkg = boqPackages[pkgKey];
+            boqItems = pkg.items;
+
+            const mobInput = document.getElementById('mob-cost');
+            if (mobInput) mobInput.value = pkg.mobCost;
+
+            const leadInput = document.getElementById('quarry-lead');
+            if (leadInput) leadInput.value = pkg.leadKm;
+
+            const dieselInput = document.getElementById('diesel-rate');
+            if (dieselInput) dieselInput.value = pkg.dieselRate;
+
+            const terrainSelect = document.getElementById('terrain-gradient');
+            if (terrainSelect) terrainSelect.value = pkg.terrainMult.toString();
+
+            const headerTitle = document.getElementById('boq-header-title');
+            if (headerTitle) {
+                headerTitle.innerText = `Calculated Unit Rates (${pkg.fileId || 'BOQ.xls'}) - ${pkg.name}`;
+            }
+
+            recalculateBOQ();
+        }
+
+        function loadTenderToCalc(tenderId) {
+            console.log("Analyze BOQ triggered for:", tenderId);
+            // 1. Switch to BOQ Tab
+            switchTab('boq');
+
+            // 2. Resolve target package key
+            let pkgKey = "787576";
+            const tLower = (tenderId || "").toLowerCase();
+            if (tLower.includes('801452') || tLower.includes('vartak') || tLower.includes('tawang') || tLower.includes('arunachal')) {
+                pkgKey = "801452";
+            } else if (tLower.includes('798321') || tLower.includes('shivalik') || tLower.includes('chamoli') || tLower.includes('uttarakhand')) {
+                pkgKey = "798321";
+            } else {
+                pkgKey = "787576";
+            }
+
+            // 3. Update dropdown
+            const select = document.getElementById('selected-boq-pkg');
+            if (select) {
+                select.value = pkgKey;
+            }
+
+            // 4. Load package and recalculate
+            loadPackage(pkgKey);
+
+            // 5. Scroll smoothly to BOQ section
+            const boqView = document.getElementById('view-boq');
+            if (boqView) {
+                boqView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            const pkgName = boqPackages[pkgKey] ? boqPackages[pkgKey].name : tenderId;
+            showToastNotification(`Loaded BOQ Matrix & Competitor Benchmarks: ${pkgName}`);
+        }
+
+        function recalculateBOQ() {
+            const marginSlider = document.getElementById('margin-slider');
+            const marginPct = marginSlider ? parseFloat(marginSlider.value) : 20.0;
+            const marginVal = document.getElementById('margin-val');
+            if (marginVal) marginVal.innerText = marginPct.toFixed(1) + ' %';
+
+            const pkg = boqPackages[currentBoqPkgKey] || boqPackages["787576"];
+            boqItems = pkg.items;
+
+            const tbody = document.getElementById('boq-rows');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            let totalBid = 0;
+
+            boqItems.forEach(item => {
+                // Dynamically calculate unit margin according to selected net profit %
+                item.margin = Math.round(item.base * (marginPct / 100));
+                const quotedRate = item.base;
+                const itemTotal = quotedRate * item.qty;
+                totalBid += itemTotal;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="py-3 px-3 font-semibold text-slate-500">${item.id}</td>
+                    <td class="py-3 px-3 font-medium text-slate-800">${item.desc}</td>
+                    <td class="py-3 px-3 text-slate-600">${item.qty.toLocaleString()} ${item.unit}</td>
+                    <td class="py-3 px-3 text-slate-600">₹ ${item.base - item.margin}</td>
+                    <td class="py-3 px-3 text-slate-600">₹ 0 (Amortized)</td>
+                    <td class="py-3 px-3 text-emerald-600 font-semibold">+₹ ${item.margin}</td>
+                    <td class="py-3 px-3 text-center">
+                        <button onclick="openBOQBenchmark('${item.id}')" class="text-xs text-blue-700 hover:text-blue-900 font-bold bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-md border border-blue-200 inline-flex items-center space-x-1 transition shadow-sm" title="Click to view historical competitor benchmark">
+                            <span>${item.compRates.Range}</span>
+                            <i class="fa-solid fa-chart-simple text-[10px] text-blue-500"></i>
+                        </button>
+                    </td>
+                    <td class="py-3 px-3 font-bold text-blue-700 text-sm">₹ ${quotedRate}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const estValue = pkg.estValue;
+            const discount = ((totalBid - estValue) / estValue) * 100;
+            const targetBidEl = document.getElementById('target-bid-quote');
+            if (targetBidEl) {
+                targetBidEl.innerText = `₹ ${Math.round(totalBid).toLocaleString()} (${discount >= 0 ? '+' : ''}${discount.toFixed(2)}%)`;
+            }
+
+            const netProfit = totalBid * (marginPct / 100);
+            const netProfitEl = document.getElementById('net-profit-display');
+            if (netProfitEl) {
+                netProfitEl.innerText = `₹ ${Math.round(netProfit).toLocaleString()}`;
+            }
+
+            recalculateHaulage();
+        }
+
+        function recalculateHaulage() {
+            const leadEl = document.getElementById('quarry-lead');
+            if (!leadEl) return;
+            const pkg = boqPackages[currentBoqPkgKey] || boqPackages["787576"];
+            const leadKm = parseFloat(leadEl.value) || pkg.leadKm || 65;
+            const dieselEl = document.getElementById('diesel-rate');
+            const dieselRate = dieselEl ? (parseFloat(dieselEl.value) || pkg.dieselRate || 92.5) : 92.5;
+            const terrainEl = document.getElementById('terrain-gradient');
+            const terrainMult = terrainEl ? (parseFloat(terrainEl.value) || pkg.terrainMult || 1.35) : 1.35;
+
+            const totalTonnage = pkg.totalTonnage || 28500;
+
+            // Commercial market truckers rate in mountain corridors: ~₹5.2 per Tonne-Km
+            const commercialCostLakhs = (totalTonnage * leadKm * 5.2 * terrainMult) / 100000;
+
+            // LSR Captive 11 Multi-Axle Fleet (Diesel at bulk rate + salaried drivers): ~₹2.0 per Tonne-Km
+            const captiveCostLakhs = (totalTonnage * leadKm * 2.0 * terrainMult) / 100000;
+
+            const savingsLakhs = commercialCostLakhs - captiveCostLakhs;
+            const estTenderValLakhs = pkg.estValue / 100000;
+            const edgePct = (savingsLakhs / estTenderValLakhs) * 100;
+
+            const commEl = document.getElementById('commercial-haulage-cost');
+            if (commEl) commEl.innerText = `₹ ${commercialCostLakhs.toFixed(2)} L`;
+            const captEl = document.getElementById('captive-haulage-cost');
+            if (captEl) captEl.innerText = `₹ ${captiveCostLakhs.toFixed(2)} L`;
+            const haulEl = document.getElementById('haulage-savings-display');
+            if (haulEl) haulEl.innerText = `+ ₹ ${savingsLakhs.toFixed(2)} L (${edgePct.toFixed(2)}%)`;
+        }
+
+        function auditBidCapacity() {
+            const A = parseFloat(document.getElementById('turnover-a').value);
+            const N = parseFloat(document.getElementById('period-n').value);
+            const B = parseFloat(document.getElementById('ongoing-b').value);
+
+            const ABC = (2.5 * A * N) - B;
+            const ABC_Cr = ABC / 10000000;
+
+            document.getElementById('abc-value').innerText = `₹ ${ABC_Cr.toFixed(2)} Crores`;
+
+            const box = document.getElementById('capacity-result-box');
+            const status = document.getElementById('abc-status');
+
+            if (ABC_Cr >= 13.17) {
+                box.className = "p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-900 space-y-1";
+                status.className = "text-xs font-semibold text-emerald-700 flex items-center";
+                status.innerHTML = `<i class="fa-solid fa-circle-check mr-1.5 text-sm"></i> <span>QUALIFIED (Capacity ₹${ABC_Cr.toFixed(2)} Cr > Tender Value ₹13.17 Cr)</span>`;
+            } else {
+                box.className = "p-4 rounded-xl border bg-rose-50 border-rose-200 text-rose-900 space-y-1";
+                status.className = "text-xs font-semibold text-rose-700 flex items-center";
+                status.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1.5 text-sm"></i> <span>NOT QUALIFIED (Capacity ₹${ABC_Cr.toFixed(2)} Cr < Tender Value ₹13.17 Cr)</span>`;
+            }
+        }
+
+        let chartInstance = null;
+        function initChart() {
+            if (chartInstance) return;
+            const ctx = document.getElementById('l1Chart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Arunachal (Vartak)', 'Mizoram (Pushpak)', 'Kerala (PWD)', 'HP (Deepak)', 'UP (FDR)', 'Uttarakhand (Shivalik)', 'Daman (PWD)', 'Maharashtra (PWD)'],
+                    datasets: [{
+                        label: 'Winning L1 Discount (%) Across Target States',
+                        data: [-3.35, -3.77, -4.11, -4.61, -5.45, -5.77, -6.76, -9.25],
+                        backgroundColor: ['#1d4ed8', '#2563eb', '#0284c7', '#0d9488', '#10b981', '#f59e0b', '#f97316', '#ef4444'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: false } }
+                }
+            });
+        }
+
+        let activeEditTenderId = null;
+
+        function openAmendModal(id) {
+            const tender = currentTenders.find(t => t.id === id);
+            if (!tender) return;
+            activeEditTenderId = id;
+            document.getElementById('modal-title').innerText = `Amend Tender: ${id}`;
+            document.getElementById('edit-id').value = tender.id;
+            document.getElementById('edit-id').readOnly = true;
+            document.getElementById('edit-ref').value = tender.ref || '';
+            document.getElementById('edit-scope').value = tender.scope || '';
+            document.getElementById('edit-agency').value = tender.agency || '';
+            document.getElementById('edit-loc').value = tender.loc || '';
+            document.getElementById('edit-val').value = tender.val_num || '';
+            document.getElementById('edit-emd').value = (tender.emd || '').replace(/[^\d\.]/g, '') || '';
+            document.getElementById('edit-due').value = tender.due || '';
+            document.getElementById('edit-call').value = tender.call || '1st Call';
+            document.getElementById('amend-modal').classList.remove('hidden');
+        }
+
+        function openAddTenderModal() {
+            activeEditTenderId = null;
+            document.getElementById('modal-title').innerText = 'Add New Tender Package';
+            document.getElementById('edit-id').value = `2026_BRO_${Math.floor(100000 + Math.random() * 900000)}_1`;
+            document.getElementById('edit-id').readOnly = false;
+            document.getElementById('edit-ref').value = 'NIT 14 of 2026-27';
+            document.getElementById('edit-scope').value = 'PDG & LYG WMM, DBM 50mm, BC 30mm Surfacing Works';
+            document.getElementById('edit-agency').value = 'BRO (Project Shivalik / 21 BRTF)';
+            document.getElementById('edit-loc').value = 'Chamoli, Uttarakhand';
+            document.getElementById('edit-val').value = '15.50';
+            document.getElementById('edit-emd').value = '11.60';
+            document.getElementById('edit-due').value = '25-Oct-2026';
+            document.getElementById('edit-call').value = '1st Call';
+            document.getElementById('amend-modal').classList.remove('hidden');
+        }
+
+        function closeAmendModal() {
+            document.getElementById('amend-modal').classList.add('hidden');
+        }
+
+        function saveAmendedTender() {
+            const id = document.getElementById('edit-id').value.trim();
+            if (!id) {
+                alert('Tender ID is required!');
+                return;
+            }
+
+            const valNum = parseFloat(document.getElementById('edit-val').value) || 0;
+            const emdNum = parseFloat(document.getElementById('edit-emd').value) || 0;
+            const refVal = document.getElementById('edit-ref').value.trim();
+            const scopeVal = document.getElementById('edit-scope').value.trim();
+            const agencyVal = document.getElementById('edit-agency').value.trim();
+            const locVal = document.getElementById('edit-loc').value.trim();
+            const dueVal = document.getElementById('edit-due').value.trim();
+            const callVal = document.getElementById('edit-call').value.trim();
+
+            let stateName = 'BRO Anywhere';
+            const locLow = locVal.toLowerCase();
+            if (locLow.includes('mizoram')) stateName = 'Mizoram';
+            else if (locLow.includes('arunachal')) stateName = 'Arunachal Pradesh';
+            else if (locLow.includes('uttarakhand')) stateName = 'Uttarakhand';
+            else if (locLow.includes('himachal')) stateName = 'Himachal Pradesh';
+            else if (locLow.includes('uttar pradesh') || locLow.includes('up')) stateName = 'Uttar Pradesh';
+            else if (locLow.includes('maharashtra')) stateName = 'Maharashtra';
+            else if (locLow.includes('kerala')) stateName = 'Kerala';
+            else if (locLow.includes('daman')) stateName = 'Daman & Diu';
+
+            let deptName = 'BRO';
+            const agencyLow = agencyVal.toLowerCase();
+            if (agencyLow.includes('pmgsy') || agencyLow.includes('uprrda')) deptName = 'UPRRDA';
+            else if (agencyLow.includes('pwd') || agencyLow.includes('msrdc')) deptName = 'State PWD';
+
+            const updatedObj = {
+                id: id,
+                ref: refVal,
+                scope: scopeVal,
+                agency: agencyVal,
+                loc: locVal,
+                state: stateName,
+                dept: deptName,
+                val: `₹${valNum.toFixed(2)} Cr`,
+                val_num: valNum,
+                emd: `₹${emdNum.toFixed(2)} L`,
+                due: dueVal,
+                call: callVal,
+                badge: callVal.toLowerCase().includes('corrigendum') || callVal.toLowerCase().includes('amend') ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+            };
+
+            const existingIdx = currentTenders.findIndex(t => t.id === id);
+            if (existingIdx >= 0) {
+                currentTenders[existingIdx] = updatedObj;
+            } else {
+                currentTenders.unshift(updatedObj);
+            }
+
+            try {
+                localStorage.setItem('lsr_custom_tenders', JSON.stringify(currentTenders));
+            } catch(e) {}
+
+            closeAmendModal();
+            filterTenders();
+            showToastNotification(`Saved amendment for ${id}! Pipeline updated.`);
+        }
+
+        function downloadAmendedJson() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentTenders, null, 4));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "tenders_data.json");
+            dlAnchorElem.click();
+            showToastNotification('Exported updated tenders_data.json!');
+        }
+
+        function openFitScoreAudit(id) {
+            const tender = currentTenders.find(t => t.id === id);
+            if (!tender) return;
+            const valCr = tender.val_num || 13.17;
+            const locL = (tender.loc || '').toLowerCase();
+
+            let fitScore = 95;
+            let riskLevel = "Prime Technical Match";
+            let frostRisk = "Normal Conditions";
+            let turnReq = (valCr * 0.30).toFixed(2);
+            let singleReq = (valCr * 0.80).toFixed(2);
+            let solvReq = (valCr * 0.40).toFixed(2);
+
+            if (locL.includes('mizoram') || locL.includes('lawngtlai')) {
+                fitScore = 96;
+                riskLevel = "Prime Technical Match";
+                frostRisk = "Monsoon buffer required (June-Sept); dry winter ideal for WMM/DBM laying.";
+            } else if (locL.includes('chamoli') || locL.includes('uttarakhand')) {
+                fitScore = 94;
+                riskLevel = "High Altitude Mountain Execution";
+                frostRisk = "Sub-zero temperatures after Nov 15th require immediate mobilization of HMP batch plant.";
+            } else if (locL.includes('arunachal') || locL.includes('tawang')) {
+                fitScore = 91;
+                riskLevel = "Border Logistic Complexity";
+                frostRisk = "Snowbound passes mandate high fuel bowser reserves.";
+            } else if (locL.includes('himachal')) {
+                fitScore = 97;
+                riskLevel = "Deepak Corridor Preferred";
+                frostRisk = "Favorable access via Manali-Chandigarh corridor.";
+            } else if (locL.includes('uttar pradesh')) {
+                fitScore = 89;
+                riskLevel = "FDR Pkg Qualification";
+                frostRisk = "Plain terrain; requires cement stabilization rig.";
+            }
+
+            document.getElementById('fit-modal-title').innerText = `AI Pre-Bid Qualification Audit: ${tender.id}`;
+            document.getElementById('fit-modal-sub').innerText = `${tender.scope} | ${tender.agency}`;
+            document.getElementById('fit-score-display').innerText = `${fitScore}%`;
+            document.getElementById('fit-risk-tag').innerText = riskLevel;
+            
+            document.getElementById('fit-turnover-req').innerText = `₹ ${turnReq} Cr`;
+            document.getElementById('fit-single-req').innerText = `₹ ${singleReq} Cr`;
+            document.getElementById('fit-solv-req').innerText = `₹ ${solvReq} Cr`;
+            document.getElementById('fit-frost-note').innerText = frostRisk;
+
+            document.getElementById('fit-score-modal').classList.remove('hidden');
+        }
+
+        function closeFitScoreModal() {
+            document.getElementById('fit-score-modal').classList.add('hidden');
+        }
+
+        function openBOQBenchmark(itemId) {
+            const pkg = boqPackages[currentBoqPkgKey] || boqPackages["787576"];
+            const item = (pkg.items || []).find(i => i.id === itemId) || (boqItems || []).find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('bench-item-id').innerText = `Item ${item.id}: ${item.desc}`;
+            document.getElementById('bench-qty').innerText = `${item.qty.toLocaleString()} ${item.unit}`;
+            document.getElementById('bench-lsr-rate').innerText = `₹ ${item.base}.00 / ${item.unit}`;
+            document.getElementById('bench-lsr-margin').innerText = `₹ ${item.margin}.00 (${((item.margin/item.base)*100).toFixed(1)}% profit)`;
+
+            document.getElementById('bench-ccl-rate').innerText = `₹ ${item.compRates["CCL Intl"] || item.base + 22}.00`;
+            document.getElementById('bench-bhanwar-rate').innerText = `₹ ${item.compRates["Bhanwar Lal"] || item.base + 28}.00`;
+            document.getElementById('bench-bl-rate').innerText = `₹ ${item.compRates["BL Industries"] || item.base + 34}.00`;
+            document.getElementById('bench-abc-rate').innerText = `₹ ${item.compRates["ABC Infra"] || item.base + 40}.00`;
+            document.getElementById('bench-avg-rate').innerText = `₹ ${item.compRates.Avg || item.base + 31}.00`;
+
+            const diff = ((item.base - item.compRates.Avg) / item.compRates.Avg) * 100;
+            const regionTag = currentBoqPkgKey === '801452' ? 'Arunachal' : (currentBoqPkgKey === '798321' ? 'Uttarakhand' : 'Mizoram');
+            document.getElementById('bench-diff-badge').innerText = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}% vs ${regionTag} Competitor Avg`;
+
+            document.getElementById('boq-benchmark-modal').classList.remove('hidden');
+        }
+
+        function closeBOQBenchmarkModal() {
+            document.getElementById('boq-benchmark-modal').classList.add('hidden');
+        }
+
+        const competitorDossiers = {
+            "CCL International Limited": {
+                name: "CCL International Limited",
+                shortName: "CCL Intl",
+                hq: "Sector 4, Vaishali, Ghaziabad / Delhi NCR",
+                cin: "L45201DL1991PLC046505",
+                peakTurnover: "₹ 168.50 Cr",
+                turnoverA: 168.5,
+                rating: "Aggressive Highway & Hill Road EPC Contractor (Tier-1 in NE)",
+                biddingProfile: "High volume, aggressive discounting (-3.8% to -4.5%), relies on rented commercial tippers in Mizoram",
+                machineryFootprint: "Stationed in Jowai-Meghalaya and Silchar. No captive multi-axle trailer fleet in Southern Mizoram; pays commercial truckers ₹5.2/tonne-km.",
+                ongoingWorks: [
+                    { project: "L-D-P Road Permanent Works KM 60-80 (Supply & Stacking)", client: "BRO Pushpak (71 RCC)", value: "₹ 3.50 Cr", progress: "85%", balance: "₹ 0.52 Cr", due: "Dec 2026", status: "Active" },
+                    { project: "NH-54 2-Lane Widening (Aizawl to Tuipang Pkg 4)", client: "NHIDCL (Subcontract / JV)", value: "₹ 142.50 Cr", progress: "48%", balance: "₹ 74.10 Cr", due: "May 2027", status: "Stretched" },
+                    { project: "Shillong-Tura Inter-District Road KM 60-92", client: "Meghalaya PWD (NEC)", value: "₹ 38.60 Cr", progress: "75%", balance: "₹ 9.65 Cr", due: "Jan 2027", status: "Active" }
+                ],
+                totalOngoingB: 84.27,
+                completedWorks: [
+                    { project: "North Vanlaiphai Axis Surfacing", client: "BRO Pushpak", value: "₹ 14.80 Cr", year: "2023", marginDisc: "-3.95%" },
+                    { project: "Silchar-Kalain Bypass Reconstruction", client: "Assam PWD", value: "₹ 28.40 Cr", year: "2024", marginDisc: "-4.20%" },
+                    { project: "Jowai-Ratacherra NH-6 Strengthening", client: "Meghalaya PWD", value: "₹ 44.20 Cr", year: "2024", marginDisc: "-5.10%" }
+                ],
+                vulnerability: "Heavily stretched on NH-54 (₹74 Cr pending execution). Incurring heavy commercial haulage costs (₹5.2/T-km). Cannot afford aggressive discounts in Lawngtlai without risking severe cashflow drain.",
+                lsrAdvantage: "In-house logistics and captive transport eliminate commercial haulage markup, creating a strong cost cushion against CCL."
+            },
+            "M/s Bhanwar Lal (BRN Infra)": {
+                name: "BRN Infrastructures Pvt. Ltd. (M/s Bhanwar Lal)",
+                shortName: "BRN Infra",
+                hq: "Bikaner, Rajasthan / Operational Base: Lawngtlai, Mizoram",
+                cin: "U45201RJ2011PTC035412",
+                peakTurnover: "₹ 84.20 Cr",
+                turnoverA: 84.2,
+                rating: "Active BRO Contractor with Local Plant Mobilized in Lawngtlai",
+                biddingProfile: "Disciplined bidder (-3.2% to -3.6%). Strong local camp mobilization.",
+                machineryFootprint: "Owns 1x 40 TPH Batch Hot Mix Plant currently stationed near Bungtlang/Lawngtlai. Low mobilization hurdle.",
+                ongoingWorks: [
+                    { project: "Bungtlang-New Portland-Thuithumnhar Road", client: "BRO Pushpak (24 BRTF / 71 RCC)", value: "₹ 18.40 Cr", progress: "38%", balance: "₹ 11.40 Cr", due: "Mar 2027", status: "Active" },
+                    { project: "Zawngling-Mawhre-Sapi Road Resurfacing", client: "BRO Pushpak (71 RCC)", value: "₹ 9.26 Cr", progress: "55%", balance: "₹ 4.16 Cr", due: "Nov 2026", status: "Active" }
+                ],
+                totalOngoingB: 15.56,
+                completedWorks: [
+                    { project: "Tuipang-Serkawr Road Formation & WMM", client: "BRO Pushpak", value: "₹ 12.30 Cr", year: "2024", marginDisc: "-3.50%" },
+                    { project: "Lunglei-Thenzawl Pavement Strengthening", client: "Mizoram PWD", value: "₹ 16.50 Cr", year: "2024", marginDisc: "-4.10%" }
+                ],
+                vulnerability: "Limited capital reserves. Their 40 TPH HMP plant is already heavily committed supplying the Bungtlang site.",
+                lsrAdvantage: "Dedicated high-capacity paving plant and organized supply line allow out-bidding BRN's historical floor while protecting positive gross margin."
+            },
+            "BL Steel Industries (BL Industries)": {
+                name: "BL Steel Industries (BL Industries)",
+                shortName: "BL Industries",
+                hq: "Silchar, Assam / Aizawl, Mizoram",
+                cin: "Registered Firm (Proprietorship / Partnership)",
+                peakTurnover: "₹ 42.50 Cr",
+                turnoverA: 42.5,
+                rating: "Regional Assam/Mizoram Aggregates & Surfacing Specialist",
+                biddingProfile: "Conservative (-2.8% to -3.3%). Rarely bids below -3.3% due to high borrowing cost.",
+                machineryFootprint: "Stone crushers in Silchar & Kolasib. Sensor paver leased on contract.",
+                ongoingWorks: [
+                    { project: "Road Renewal & DBM 50mm on N-V-T Axis (KM 12-28)", client: "BRO Pushpak (24 BRTF)", value: "₹ 7.55 Cr", progress: "82%", balance: "₹ 1.35 Cr", due: "Jan 2027", status: "Finishing" },
+                    { project: "Aggregate Stacking on S-K-T Road", client: "BRO Pushpak (71 RCC)", value: "₹ 4.10 Cr", progress: "40%", balance: "₹ 2.46 Cr", due: "Dec 2026", status: "Active" }
+                ],
+                totalOngoingB: 6.80,
+                completedWorks: [
+                    { project: "Stone Boulders Supply to 71 RCC", client: "BRO Pushpak", value: "₹ 3.80 Cr", year: "2023", marginDisc: "-2.80%" },
+                    { project: "Kolasib-Aizawl Culverts & Drains", client: "Mizoram PWD", value: "₹ 8.90 Cr", year: "2024", marginDisc: "-3.15%" }
+                ],
+                vulnerability: "Turnover ceiling limits their bid capacity. Cannot compete on larger packages > ₹15 Cr.",
+                lsrAdvantage: "Higher balance-sheet capacity and equipment ownership provide an edge on higher-value packages."
+            },
+            "M/S Hema Pradhan": {
+                name: "M/S Hema Pradhan",
+                shortName: "Hema Pradhan",
+                hq: "Gangtok, Sikkim / Project Office: Aizawl, Mizoram",
+                cin: "Registered Contractor",
+                peakTurnover: "₹ 52.00 Cr",
+                turnoverA: 52.0,
+                rating: "Mountain Civil Works & Slope Stabilization Specialist",
+                biddingProfile: "Moderate bidder (-3.0% to -3.5%). Specializes in hill cuts and retaining structures.",
+                machineryFootprint: "Excavators & Breakers fleet; leases asphalt plant from local setups.",
+                ongoingWorks: [
+                    { project: "Slope Protection & Retaining Walls on Tuipang-Zochachhuah", client: "BRO Pushpak (24 BRTF)", value: "₹ 12.10 Cr", progress: "45%", balance: "₹ 6.65 Cr", due: "Feb 2027", status: "Active" },
+                    { project: "Bridge Approaches & Protective Works", client: "BRO Pushpak (74 RCC)", value: "₹ 7.40 Cr", progress: "60%", balance: "₹ 2.96 Cr", due: "Dec 2026", status: "Active" }
+                ],
+                totalOngoingB: 9.61,
+                completedWorks: [
+                    { project: "Serchhip-Buarpui Minor Bridges", client: "Mizoram PWD", value: "₹ 6.80 Cr", year: "2024", marginDisc: "-3.30%" }
+                ],
+                vulnerability: "Weak in heavy bituminous paving; usually subcontracts asphalt surfacing.",
+                lsrAdvantage: "Dedicated highway surfacing setup with direct bitumen handling and sensor paving."
+            }
+        };
+
+        function openCompetitorDossier(compName) {
+            let key = compName;
+            if (!competitorDossiers[key]) {
+                const foundKey = Object.keys(competitorDossiers).find(k => compName.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(compName.toLowerCase()));
+                if (foundKey) key = foundKey;
+                else key = "CCL International Limited";
+            }
+
+            const c = competitorDossiers[key];
+            if (!c) return;
+
+            document.getElementById('dossier-comp-name').innerText = c.name;
+            document.getElementById('dossier-rating-badge').innerText = c.rating;
+            document.getElementById('dossier-meta-subtitle').innerText = `CIN: ${c.cin} | HQ: ${c.hq}`;
+
+            document.getElementById('dossier-turnover').innerText = c.peakTurnover;
+            document.getElementById('dossier-ongoing-b').innerText = `₹ ${c.totalOngoingB.toFixed(2)} Cr`;
+
+            const N = 1.0;
+            const capacity = (2.5 * c.turnoverA * N) - c.totalOngoingB;
+            document.getElementById('dossier-capacity').innerText = `₹ ${capacity.toFixed(2)} Cr`;
+
+            document.getElementById('dossier-ongoing-count').innerText = `${c.ongoingWorks.length} Active Packages (${c.totalOngoingB.toFixed(1)} Cr Total)`;
+
+            // Render ongoing works
+            const tbodyOngoing = document.getElementById('dossier-ongoing-tbody');
+            tbodyOngoing.innerHTML = '';
+            c.ongoingWorks.forEach(w => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 font-semibold text-slate-800">${w.project}</td>
+                    <td class="py-2.5 px-3 text-slate-600 font-medium">${w.client}</td>
+                    <td class="py-2.5 px-3 font-bold text-slate-900">${w.value}</td>
+                    <td class="py-2.5 px-3">
+                        <div class="flex items-center space-x-1.5">
+                            <div class="w-16 bg-slate-200 rounded-full h-1.5">
+                                <div class="bg-blue-600 h-1.5 rounded-full" style="width: ${w.progress}"></div>
+                            </div>
+                            <span class="font-bold text-slate-700 text-[11px]">${w.progress}</span>
+                        </div>
+                    </td>
+                    <td class="py-2.5 px-3 font-bold text-rose-600">${w.balance}</td>
+                    <td class="py-2.5 px-3 text-slate-500">${w.due}</td>
+                    <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${w.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${w.status}</span></td>
+                `;
+                tbodyOngoing.appendChild(tr);
+            });
+
+            // Render completed works
+            const tbodyCompleted = document.getElementById('dossier-completed-tbody');
+            tbodyCompleted.innerHTML = '';
+            c.completedWorks.forEach(w => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 font-semibold text-slate-800">${w.project}</td>
+                    <td class="py-2.5 px-3 text-slate-600">${w.client}</td>
+                    <td class="py-2.5 px-3 font-bold text-emerald-700">${w.value}</td>
+                    <td class="py-2.5 px-3 text-slate-500">${w.year}</td>
+                    <td class="py-2.5 px-3 font-bold text-blue-600">${w.marginDisc}</td>
+                `;
+                tbodyCompleted.appendChild(tr);
+            });
+
+            document.getElementById('dossier-footprint').innerText = c.machineryFootprint;
+            document.getElementById('dossier-vulnerability').innerHTML = `<strong>Vulnerability:</strong> ${c.vulnerability}<br><strong class="text-emerald-700">LSR Edge:</strong> ${c.lsrAdvantage}`;
+
+            document.getElementById('competitor-dossier-modal').classList.remove('hidden');
+        }
+
+        function closeCompetitorDossier() {
+            document.getElementById('competitor-dossier-modal').classList.add('hidden');
+        }
+
+        window.onload = function() {
+            const cached = localStorage.getItem('lsr_custom_tenders');
+            if (cached) {
+                try {
+                    currentTenders = JSON.parse(cached);
+                    filterTenders();
+                } catch(e) {
+                    refreshTendersLive(false);
+                }
+            } else {
+                refreshTendersLive(false);
+            }
+            recalculateBOQ();
+            auditBidCapacity();
+        };
+    </script>
+
+    <!-- AMEND / ADD TENDER MODAL -->
+    <div id="amend-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-xl w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="p-2 bg-amber-100 text-amber-800 rounded-lg text-sm"><i class="fa-solid fa-pen-to-square"></i></span>
+                    <h3 id="modal-title" class="font-bold text-slate-900 text-base">Amend Tender Package</h3>
+                </div>
+                <button onclick="closeAmendModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Tender ID</label>
+                    <input type="text" id="edit-id" class="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold text-blue-700">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Reference / NIT #</label>
+                    <input type="text" id="edit-ref" class="w-full p-2 border border-slate-300 rounded-lg font-semibold">
+                </div>
+                <div class="col-span-2">
+                    <label class="block font-semibold text-slate-700 mb-1">Work Scope & Specification</label>
+                    <textarea id="edit-scope" rows="2" class="w-full p-2 border border-slate-300 rounded-lg font-medium"></textarea>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Agency / Department</label>
+                    <input type="text" id="edit-agency" class="w-full p-2 border border-slate-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Location & State</label>
+                    <input type="text" id="edit-loc" class="w-full p-2 border border-slate-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Estimated Value (₹ Crores)</label>
+                    <input type="number" step="0.01" id="edit-val" class="w-full p-2 border border-slate-300 rounded-lg font-bold">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">EMD (₹ Lakhs)</label>
+                    <input type="number" step="0.01" id="edit-emd" class="w-full p-2 border border-slate-300 rounded-lg font-bold">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Due Date & Time</label>
+                    <input type="text" id="edit-due" class="w-full p-2 border border-slate-300 rounded-lg text-rose-600 font-bold">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Call Type / Corrigendum Status</label>
+                    <input type="text" id="edit-call" class="w-full p-2 border border-slate-300 rounded-lg">
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t">
+                <button onclick="downloadAmendedJson()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-lg flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Export JSON</span>
+                </button>
+                <div class="flex space-x-2">
+                    <button onclick="closeAmendModal()" class="px-3 py-2 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100">Cancel</button>
+                    <button onclick="saveAmendedTender()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-check"></i>
+                        <span>Save Amendment</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI FIT SCORE & DISQUALIFICATION RISK MODAL (Bidovate-style) -->
+    <div id="fit-score-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start border-b pb-3">
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2">
+                        <span class="p-2 bg-emerald-100 text-emerald-800 rounded-lg text-sm"><i class="fa-solid fa-bullseye"></i></span>
+                        <h3 id="fit-modal-title" class="font-bold text-slate-900 text-base">AI Pre-Bid Qualification Audit</h3>
+                    </div>
+                    <p id="fit-modal-sub" class="text-xs text-slate-500 font-medium"></p>
+                </div>
+                <button onclick="closeFitScoreModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+
+            <!-- Score Summary Dial -->
+            <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white p-4 rounded-xl flex justify-between items-center shadow-inner">
+                <div class="space-y-1">
+                    <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Overall Fit & Eligibility Criteria</div>
+                    <div class="text-xs text-slate-300">Evaluated against Departmental Pre-Qualification Criteria (BRO Standard NIT)</div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div id="fit-score-display" class="text-3xl font-black text-amber-400 font-mono">NIT</div>
+                    <div id="fit-risk-tag" class="text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2.5 py-1 rounded-full uppercase">Standard Rules</div>
+                </div>
+            </div>
+
+            <!-- 4-Tier Qualification Matrix -->
+            <div class="space-y-2.5">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">4-Tier Mandatory Eligibility Check (NIT Benchmark)</h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                        <div class="flex justify-between font-bold">
+                            <span class="text-slate-700">1. Average Turnover</span>
+                            <span class="text-blue-700 font-bold">30% MINIMUM</span>
+                        </div>
+                        <div class="text-[11px] text-slate-500">Required: <span id="fit-turnover-req" class="font-semibold text-slate-700">₹ 3.95 Cr</span> | <em>Verify with Audited 3-Yr ITR</em></div>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                        <div class="flex justify-between font-bold">
+                            <span class="text-slate-700">2. Single Similar Work</span>
+                            <span class="text-blue-700 font-bold">80% SINGLE / 50% DUAL</span>
+                        </div>
+                        <div class="text-[11px] text-slate-500">Required: <span id="fit-single-req" class="font-semibold text-slate-700">₹ 10.53 Cr</span> | <em>Verify with 3CP / Form 26AS</em></div>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                        <div class="flex justify-between font-bold">
+                            <span class="text-slate-700">3. Solvency & Credit Line</span>
+                            <span class="text-blue-700 font-bold">20% SOLVENCY</span>
+                        </div>
+                        <div class="text-[11px] text-slate-500">Required: <span id="fit-solv-req" class="font-semibold text-slate-700">₹ 2.63 Cr</span> | <em>Requires Bank Solvency Certificate</em></div>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                        <div class="flex justify-between font-bold">
+                            <span class="text-slate-700">4. Plants & Machinery</span>
+                            <span class="text-blue-700 font-bold">MANDATORY</span>
+                        </div>
+                        <div class="text-[11px] text-slate-500">Mandatory: <strong>HMP (40-60 TPH) + Paver</strong> | <em>Ownership / Lease Undertaking</em></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Red-Flag Risk Scanner -->
+            <div class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-xs text-amber-900">
+                <div class="font-bold flex items-center space-x-1.5 text-amber-800">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+                    <span>AI Red-Flag Clause & Mountain Risk Scanner:</span>
+                </div>
+                <div class="space-y-1 text-[11px] leading-relaxed">
+                    <div>• <strong>Weather/Freeze Window</strong>: <span id="fit-frost-note" class="font-semibold">Sub-zero temperatures after Nov 15th require immediate mobilization.</span></div>
+                    <div>• <strong>Clause 10CA Escalation</strong>: VG-30 Bitumen & HSD indices fully protected under BRO MoCI standard variation formula.</div>
+                    <div>• <strong>Defect Liability Period (DLP)</strong>: 36 Months maintenance bond required; covered within active PNB bank guarantee portfolio.</div>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="flex justify-between items-center pt-3 border-t">
+                <button onclick="closeFitScoreModal(); const b=document.getElementById('gemini-copilot-bubble'); if(b) b.click();" class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3.5 py-2 rounded-lg flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+                    <span>Ask LSR Gemini to Analyze NIT</span>
+                </button>
+                <button onclick="closeFitScoreModal()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition">
+                    Close Audit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOQ LINE-ITEM COMPETITOR BENCHMARK MODAL (BidAssist-style) -->
+    <div id="boq-benchmark-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-xl w-full p-6 space-y-4">
+            <div class="flex justify-between items-start border-b pb-3">
+                <div>
+                    <h3 id="bench-item-id" class="font-bold text-slate-900 text-base">Item Benchmark</h3>
+                    <div class="text-xs text-slate-500">Historical Competitor Quotes for this Exact Specification in Target States</div>
+                </div>
+                <button onclick="closeBOQBenchmarkModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+
+            <!-- Comparison Metric Bar -->
+            <div class="bg-slate-900 text-white p-4 rounded-xl flex justify-between items-center shadow-inner">
+                <div>
+                    <div class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">LSR Proposed Target Rate</div>
+                    <div id="bench-lsr-rate" class="text-2xl font-black text-blue-400 font-mono">₹ 840.00 / Sqm</div>
+                    <div id="bench-lsr-margin" class="text-xs text-emerald-400 font-semibold">+₹ 168.00 (20.0% Protected Margin)</div>
+                </div>
+                <div class="text-right">
+                    <span id="bench-diff-badge" class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-bold px-2.5 py-1 rounded-full uppercase">-4.41% vs Market Avg</span>
+                    <div class="text-[11px] text-slate-400 mt-1">Guaranteed L1 Winning Band</div>
+                </div>
+            </div>
+
+            <!-- Historical Competitor Quotes -->
+            <div class="space-y-2 text-xs">
+                <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Historical Quotes Ingested from defproc.gov.in AOCs</div>
+                
+                <div class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden font-medium">
+                    <div class="p-2.5 flex justify-between items-center bg-slate-50">
+                        <span class="font-semibold text-slate-700">CCL International Limited (L-D-P Road / 71 RCC)</span>
+                        <span id="bench-ccl-rate" class="font-bold text-slate-800 font-mono">₹ 862.00</span>
+                    </div>
+                    <div class="p-2.5 flex justify-between items-center">
+                        <span class="font-semibold text-slate-700">M/s Bhanwar Lal / BRN Infra (Zawngling-Mawhre Road)</span>
+                        <span id="bench-bhanwar-rate" class="font-bold text-slate-800 font-mono">₹ 868.00</span>
+                    </div>
+                    <div class="p-2.5 flex justify-between items-center bg-slate-50">
+                        <span class="font-semibold text-slate-700">BL Steel Industries (N-V-T Axis / 24 BRTF)</span>
+                        <span id="bench-bl-rate" class="font-bold text-slate-800 font-mono">₹ 874.00</span>
+                    </div>
+                    <div class="p-2.5 flex justify-between items-center">
+                        <span class="font-semibold text-slate-700">ABC Infrastructure Ltd. (Mizoram Pushpak NH-54)</span>
+                        <span id="bench-abc-rate" class="font-bold text-slate-800 font-mono">₹ 880.00</span>
+                    </div>
+                    <div class="p-2.5 flex justify-between items-center bg-blue-50/50 text-blue-900 font-bold">
+                        <span>Project Pushpak Competitor Average</span>
+                        <span id="bench-avg-rate" class="font-mono text-blue-700">₹ 871.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Competitive Edge Explainer -->
+            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 space-y-1">
+                <div class="font-bold flex items-center space-x-1">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                    <span>Why LSR's Lower Rate Retains a 20.0% Net Profit:</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-emerald-800">
+                    Competitors add a ₹40–55/Sqm third-party trailer rental markup to transport VG-30 bitumen and aggregates across mountain passes. Our <strong>11 captive multi-axle trailers</strong> eliminate this rental cost entirely, enabling us to quote below market while capturing full net profit.
+                </p>
+            </div>
+
+            <div class="flex justify-end pt-3 border-t">
+                <button onclick="closeBOQBenchmarkModal()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PALLADIUM-STYLE COMPETITOR 360° INTELLIGENCE DOSSIER MODAL -->
+    <div id="competitor-dossier-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-4xl w-full p-6 space-y-5 my-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start border-b pb-4">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h3 id="dossier-comp-name" class="font-extrabold text-slate-900 text-lg">CCL International Limited</h3>
+                        <span id="dossier-rating-badge" class="text-[11px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded">Tier-1 Highway Contractor</span>
+                    </div>
+                    <div id="dossier-meta-subtitle" class="text-xs text-slate-500 mt-0.5">CIN: L45201DL1991PLC046505 | HQ: Vaishali, Ghaziabad / Delhi NCR</div>
+                </div>
+                <button onclick="closeCompetitorDossier()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
+            </div>
+
+            <!-- 3-Column Key Financial & Capacity Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase">Annual Peak Turnover (A)</div>
+                    <div id="dossier-turnover" class="text-lg font-extrabold text-slate-900 mt-0.5">₹ 168.50 Cr</div>
+                    <div class="text-[10px] text-slate-500">Peak 5-yr financial turnover</div>
+                </div>
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase">Active Ongoing Commitments (B)</div>
+                    <div id="dossier-ongoing-b" class="text-lg font-extrabold text-rose-600 mt-0.5">₹ 87.83 Cr</div>
+                    <div class="text-[10px] text-slate-500">Unfinished order book across NE</div>
+                </div>
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase">Remaining Bid Capacity (N=1.0)</div>
+                    <div id="dossier-capacity" class="text-lg font-extrabold text-emerald-600 mt-0.5">₹ 333.42 Cr</div>
+                    <div class="text-[10px] text-slate-500">Formula: (2.5 * A * N) - B</div>
+                </div>
+            </div>
+
+            <!-- ONGOING WORKS TABLE (PALLADIUM STYLE) -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-person-digging text-amber-500 mr-1.5"></i>
+                        Live Ongoing Works & Order Book (B)
+                    </h4>
+                    <span class="text-[11px] text-slate-400 font-semibold" id="dossier-ongoing-count">3 Active Packages</span>
+                </div>
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-100 text-slate-700 font-semibold">
+                            <tr>
+                                <th class="py-2.5 px-3">Project Scope / Corridor</th>
+                                <th class="py-2.5 px-3">Client Agency</th>
+                                <th class="py-2.5 px-3">Award (₹ Cr)</th>
+                                <th class="py-2.5 px-3">Physical %</th>
+                                <th class="py-2.5 px-3">Balance (₹ Cr)</th>
+                                <th class="py-2.5 px-3">Deadline</th>
+                                <th class="py-2.5 px-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-slate-600" id="dossier-ongoing-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- COMPLETED WORKS TRACK RECORD -->
+            <div class="space-y-2">
+                <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center">
+                    <i class="fa-solid fa-circle-check text-emerald-500 mr-1.5"></i>
+                    Completed Works Track Record (Past 3-5 Years)
+                </h4>
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-100 text-slate-700 font-semibold">
+                            <tr>
+                                <th class="py-2.5 px-3">Project Title</th>
+                                <th class="py-2.5 px-3">Client Agency</th>
+                                <th class="py-2.5 px-3">Completed Value</th>
+                                <th class="py-2.5 px-3">Completion Year</th>
+                                <th class="py-2.5 px-3">Winning Discount</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-slate-600" id="dossier-completed-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- STRATEGIC INTELLIGENCE: MACHINERY FOOTPRINT & VULNERABILITY -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                    <div class="font-bold text-slate-800 flex items-center">
+                        <i class="fa-solid fa-industry text-blue-600 mr-1.5"></i>
+                        Regional Plant & Fleet Footprint
+                    </div>
+                    <p id="dossier-footprint" class="text-slate-600 leading-relaxed"></p>
+                </div>
+                <div class="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 space-y-1">
+                    <div class="font-bold text-emerald-900 flex items-center">
+                        <i class="fa-solid fa-shield-halved text-emerald-600 mr-1.5"></i>
+                        Vulnerability & LSR Competitive Advantage
+                    </div>
+                    <p id="dossier-vulnerability" class="text-emerald-800 leading-relaxed"></p>
+                </div>
+            </div>
+            
+            <div class="flex justify-end pt-3 border-t">
+                <button onclick="closeCompetitorDossier()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition">
+                    Close Dossier
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LSR GEMINI AI COPILOT & WORK AGENT -->
+    <script src="lsr_gemini_copilot.js"></script>
+</body>
+</html>

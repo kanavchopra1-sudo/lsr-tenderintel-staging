@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="lsrGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e40af" />
+      <stop offset="50%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+    <linearGradient id="roadGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#334155" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Logo Mark Icon: Stylized Geometric Road & Hexagon Bridge -->
+  <g transform="translate(10, 10)" filter="url(#shadow)">
+    <!-- Outer Shield / Hexagon -->
+    <path d="M50 0 L95 25 L95 75 L50 100 L5 75 L5 25 Z" fill="#0f172a" stroke="url(#goldGrad)" stroke-width="3" />
+    
+    <!-- Receding Highway / Road Perspective -->
+    <path d="M26 88 L46 28 L54 28 L74 88 Z" fill="url(#roadGrad)" />
+    
+    <!-- Highway Yellow Center Dashes -->
+    <line x1="50" y1="34" x2="50" y2="44" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" />
+    <line x1="50" y1="52" x2="50" y2="65" stroke="#fbbf24" stroke-width="3" stroke-linecap="round" />
+    <line x1="50" y1="73" x2="50" y2="88" stroke="#fbbf24" stroke-width="3.5" stroke-linecap="round" />
+
+    <!-- Infrastructure Arch Bridge Crest -->
+    <path d="M15 50 Q50 20 85 50" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" />
+    <path d="M22 62 Q50 38 78 62" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" opacity="0.8" />
+  </g>
+
+  <!-- Main Typography -->
+  <!-- "LSR" in Heavy Premium Industrial Font -->
+  <text x="125" y="65" font-family="'Inter', 'Montserrat', sans-serif" font-size="52" font-weight="900" letter-spacing="3" fill="#0f172a">
+    LSR
+  </text>
+  
+  <!-- Accent Highway Gold Stripe under LSR -->
+  <rect x="125" y="74" width="112" height="5" rx="2.5" fill="url(#goldGrad)" />
+
+  <!-- "INFRACON" in Sharp Construction Geometry -->
+  <text x="250" y="65" font-family="'Inter', 'Montserrat', sans-serif" font-size="44" font-weight="800" letter-spacing="5" fill="#1e40af">
+    INFRACON
+  </text>
+
+  <!-- Subtitle Tagline -->
+  <text x="126" y="98" font-family="'Inter', sans-serif" font-size="12" font-weight="700" letter-spacing="2" fill="#64748b">
+    ROADS • HIGHWAYS • DEFENCE INFRASTRUCTURE
+  </text>
+  
+  <rect x="125" y="105" width="365" height="1" fill="#cbd5e1" />
+</svg>
